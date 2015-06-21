@@ -6,7 +6,7 @@
 
 
     <ImageView
-        android:id="@+id/artist_search_result_item_thumbnail"
+        android:id="@+id/track_item_thumbnail"
         android:layout_width="64dp"
         android:layout_height="64dp"
         android:layout_gravity="center_vertical"

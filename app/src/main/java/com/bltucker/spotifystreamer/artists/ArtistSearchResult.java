@@ -1,11 +1,11 @@
-package com.bltucker.spotifystreamer;
+package com.bltucker.spotifystreamer.artists;
 
 import android.os.Parcel;
 import android.os.Parcelable;
 
-public final class ArtistSearchResult implements Parcelable{
+final class ArtistSearchResult implements Parcelable{
 
-    private final String id;
+    public final String id;
     public final String artistName;
     public final String thumbnailUriString;
 

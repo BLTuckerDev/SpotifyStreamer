@@ -1,5 +1,6 @@
-package com.bltucker.spotifystreamer;
+package com.bltucker.spotifystreamer.artists;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
@@ -8,12 +9,14 @@ import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import com.bltucker.spotifystreamer.R;
+import com.bltucker.spotifystreamer.tracks.TrackListActivity;
 import com.squareup.picasso.Picasso;
 
 import java.util.ArrayList;
 import java.util.List;
 
-public final class ArtistSearchResultAdapter extends RecyclerView.Adapter<ArtistSearchResultAdapter.ViewHolder>{
+final class ArtistSearchResultAdapter extends RecyclerView.Adapter<ArtistSearchResultAdapter.ViewHolder>{
 
     private final List<ArtistSearchResult> searchResults;
 
@@ -65,17 +68,26 @@ public final class ArtistSearchResultAdapter extends RecyclerView.Adapter<Artist
 
 
 
+
     public class ViewHolder  extends RecyclerView.ViewHolder{
 
         public final ImageView thumbnailImageView;
         public final TextView artistNameTextView;
 
-
         public ViewHolder(View rootView){
             super(rootView);
+
+            rootView.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    String artistId = ArtistSearchResultAdapter.this.searchResults.get(getLayoutPosition()).id;
+                    TrackListActivity.launch(v.getContext(), artistId);
+                }
+            });
 
             this.thumbnailImageView = (ImageView) rootView.findViewById(R.id.artist_search_result_item_thumbnail);
             this.artistNameTextView = (TextView) rootView.findViewById(R.id.artist_search_result_item_title);
         }
+
     }
 }

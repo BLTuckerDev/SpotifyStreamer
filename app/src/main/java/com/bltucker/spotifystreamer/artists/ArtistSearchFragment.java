@@ -1,4 +1,4 @@
-package com.bltucker.spotifystreamer;
+package com.bltucker.spotifystreamer.artists;
 
 import android.app.Fragment;
 import android.os.AsyncTask;
@@ -11,10 +11,13 @@ import android.text.Editable;
 import android.text.TextWatcher;
 import android.util.Log;
 import android.view.LayoutInflater;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.EditText;
 import android.widget.Toast;
+
+import com.bltucker.spotifystreamer.R;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -94,10 +97,11 @@ public final class ArtistSearchFragment extends Fragment implements TextWatcher 
             if(savedInstanceState.containsKey(LAST_SCROLL_SCROLL_POSITION_BUNDLE_KEY)){
                 int scrollPosition = savedInstanceState.getInt(LAST_SCROLL_SCROLL_POSITION_BUNDLE_KEY);
                 if(scrollPosition < layoutManager.getChildCount()){
-                    layoutManager.scrollToPosition(savedInstanceState.getInt(LAST_SCROLL_SCROLL_POSITION_BUNDLE_KEY));
+                    layoutManager.scrollToPosition(scrollPosition);
                 }
             }
         }
+
 
         return view;
     }
