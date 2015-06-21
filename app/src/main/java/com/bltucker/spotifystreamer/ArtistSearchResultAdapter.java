@@ -1,5 +1,6 @@
 package com.bltucker.spotifystreamer;
 
+import android.os.Bundle;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -27,6 +28,19 @@ public final class ArtistSearchResultAdapter extends RecyclerView.Adapter<Artist
         this.notifyDataSetChanged();
     }
 
+
+    public void saveDataToBundle(Bundle bundle, String bundleKey) {
+        bundle.putParcelableArrayList(bundleKey, new ArrayList<>(searchResults));
+    }
+
+
+    public void restoreDataFromBundle(Bundle bundle, String bundleKey){
+
+        ArrayList<ArtistSearchResult> parcelableArrayList = bundle.getParcelableArrayList(bundleKey);
+        this.searchResults.addAll(parcelableArrayList);
+        this.notifyDataSetChanged();
+    }
+
     @Override
     public ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
         View rootView = LayoutInflater.from(parent.getContext()).inflate(R.layout.artist_search_result_item, parent, false);
@@ -46,6 +60,8 @@ public final class ArtistSearchResultAdapter extends RecyclerView.Adapter<Artist
     public int getItemCount() {
         return this.searchResults.size();
     }
+
+
 
 
 

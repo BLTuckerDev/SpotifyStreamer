@@ -16,15 +16,6 @@ import android.view.ViewGroup;
 import android.widget.EditText;
 import android.widget.Toast;
 
-import com.google.gson.JsonArray;
-import com.google.gson.JsonElement;
-import com.google.gson.JsonObject;
-import com.google.gson.JsonParser;
-import com.squareup.okhttp.OkHttpClient;
-import com.squareup.okhttp.Request;
-import com.squareup.okhttp.Response;
-
-import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -34,12 +25,13 @@ import kaaes.spotify.webapi.android.SpotifyApi;
 import kaaes.spotify.webapi.android.SpotifyService;
 import kaaes.spotify.webapi.android.models.Artist;
 import kaaes.spotify.webapi.android.models.ArtistsPager;
-import kaaes.spotify.webapi.android.models.Image;
 
 
-public class ArtistSearchFragment extends Fragment implements TextWatcher {
+public final class ArtistSearchFragment extends Fragment implements TextWatcher {
 
     private static final String LAST_SEARCH_QUERY_BUNDLE_KEY = "lastSearchQuery";
+    private static final String LAST_SCROLL_SCROLL_POSITION_BUNDLE_KEY = "scrollPosition";
+    private static final String LAST_SEARCH_RESULT_LIST_BUNDLE_KEY = "searchResults";
 
     @InjectView(R.id.artist_search_field)
     EditText artistSearchField;
@@ -64,6 +56,16 @@ public class ArtistSearchFragment extends Fragment implements TextWatcher {
     @Override
     public void onSaveInstanceState(Bundle outState) {
         outState.putString(LAST_SEARCH_QUERY_BUNDLE_KEY, lastSearchQuery);
+
+        LinearLayoutManager layoutManager = (LinearLayoutManager) this.artistSearchResultsRecycler.getLayoutManager();
+
+        if(layoutManager != null){
+            outState.putInt(LAST_SCROLL_SCROLL_POSITION_BUNDLE_KEY, layoutManager.findLastVisibleItemPosition());
+        }
+
+        ArtistSearchResultAdapter searchResultAdapter = (ArtistSearchResultAdapter) artistSearchResultsRecycler.getAdapter();
+        searchResultAdapter.saveDataToBundle(outState, LAST_SEARCH_RESULT_LIST_BUNDLE_KEY);
+
         super.onSaveInstanceState(outState);
     }
 
@@ -76,13 +78,26 @@ public class ArtistSearchFragment extends Fragment implements TextWatcher {
         if(savedInstanceState != null && savedInstanceState.containsKey(LAST_SEARCH_QUERY_BUNDLE_KEY)){
             artistSearchField.setText(savedInstanceState.getString(LAST_SEARCH_QUERY_BUNDLE_KEY));
             lastSearchQuery = savedInstanceState.getString(LAST_SEARCH_QUERY_BUNDLE_KEY);
+            artistSearchField.clearFocus();
         }
 
         artistSearchField.addTextChangedListener(this);
 
         artistSearchResultsRecycler.setHasFixedSize(true);
-        artistSearchResultsRecycler.setLayoutManager(new LinearLayoutManager(getActivity()));
+        LinearLayoutManager layoutManager = new LinearLayoutManager(getActivity());
+        artistSearchResultsRecycler.setLayoutManager(layoutManager);
         artistSearchResultsRecycler.setAdapter(searchResultsAdapter);
+
+        if(savedInstanceState != null && savedInstanceState.containsKey(LAST_SEARCH_RESULT_LIST_BUNDLE_KEY)){
+            searchResultsAdapter.restoreDataFromBundle(savedInstanceState, LAST_SEARCH_RESULT_LIST_BUNDLE_KEY);
+
+            if(savedInstanceState.containsKey(LAST_SCROLL_SCROLL_POSITION_BUNDLE_KEY)){
+                int scrollPosition = savedInstanceState.getInt(LAST_SCROLL_SCROLL_POSITION_BUNDLE_KEY);
+                if(scrollPosition < layoutManager.getChildCount()){
+                    layoutManager.scrollToPosition(savedInstanceState.getInt(LAST_SCROLL_SCROLL_POSITION_BUNDLE_KEY));
+                }
+            }
+        }
 
         return view;
     }
@@ -102,15 +117,9 @@ public class ArtistSearchFragment extends Fragment implements TextWatcher {
     @Override
     public void onTextChanged(final CharSequence s, int start, int before, int count) {
 
-        Log.d("LOG", "TEXT CHANGED");
-        Log.d("LOG", "LAST QUERY: " + lastSearchQuery);
-        Log.d("LOG", "NEW QUERY: " + s.toString());
-
         if(nextScheduledSearchRunnable != null){
             scheduledSearchHandler.removeCallbacks(nextScheduledSearchRunnable);
         }
-
-
 
         if(!s.toString().equals(lastSearchQuery) && !s.toString().isEmpty()){
 
@@ -122,7 +131,7 @@ public class ArtistSearchFragment extends Fragment implements TextWatcher {
                 }
             };
 
-            scheduledSearchHandler.postDelayed(nextScheduledSearchRunnable, 300);
+            scheduledSearchHandler.postDelayed(nextScheduledSearchRunnable, 400);
         }
 
     }
