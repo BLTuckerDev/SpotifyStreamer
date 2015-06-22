@@ -36,8 +36,6 @@ public final class TrackListFragment extends Fragment {
 
     private TrackListAdapter trackListAdapter;
 
-    private int positionToRestoreScrollTo;
-
     @InjectView(R.id.track_list_recycler_view)
     RecyclerView trackListRecycler;
 
@@ -80,25 +78,24 @@ public final class TrackListFragment extends Fragment {
         trackListRecycler.setLayoutManager(layoutManager);
         trackListRecycler.setAdapter(trackListAdapter);
 
-        if(savedInstanceState != null && savedInstanceState.containsKey(TOP_TRACKS_LIST_BUNDLE_KEY)){
-            this.trackListAdapter.restoreDataFromBundle(savedInstanceState, TOP_TRACKS_LIST_BUNDLE_KEY);
-
-            if(savedInstanceState.containsKey(LAST_SCROLL_SCROLL_POSITION_BUNDLE_KEY)){
-                this.positionToRestoreScrollTo = savedInstanceState.getInt(LAST_SCROLL_SCROLL_POSITION_BUNDLE_KEY);
-            }
-
-        } else {
-            this.getTracksInBackground();
-        }
-
         return view;
     }
 
 
     @Override
-    public void onResume() {
-        super.onResume();
-        trackListRecycler.scrollToPosition(positionToRestoreScrollTo);
+    public void onActivityCreated(Bundle savedInstanceState) {
+        super.onActivityCreated(savedInstanceState);
+
+        if(savedInstanceState != null && savedInstanceState.containsKey(TOP_TRACKS_LIST_BUNDLE_KEY)){
+            this.trackListAdapter.restoreDataFromBundle(savedInstanceState, TOP_TRACKS_LIST_BUNDLE_KEY);
+
+            if(savedInstanceState.containsKey(LAST_SCROLL_SCROLL_POSITION_BUNDLE_KEY)){
+                trackListRecycler.scrollToPosition(savedInstanceState.getInt(LAST_SCROLL_SCROLL_POSITION_BUNDLE_KEY));
+            }
+
+        } else {
+            this.getTracksInBackground();
+        }
     }
 
 

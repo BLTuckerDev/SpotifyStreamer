@@ -50,8 +50,6 @@ public final class ArtistSearchFragment extends Fragment implements TextWatcher 
 
     private ArtistSearchResultAdapter searchResultsAdapter;
 
-    private int positionToRestoreScrollTo;
-
     public ArtistSearchFragment() {
         scheduledSearchHandler = new Handler(Looper.getMainLooper());
         this.searchResultsAdapter = new ArtistSearchResultAdapter();
@@ -92,22 +90,21 @@ public final class ArtistSearchFragment extends Fragment implements TextWatcher 
         artistSearchResultsRecycler.setLayoutManager(layoutManager);
         artistSearchResultsRecycler.setAdapter(searchResultsAdapter);
 
-        if(savedInstanceState != null && savedInstanceState.containsKey(LAST_SEARCH_RESULT_LIST_BUNDLE_KEY)){
-            searchResultsAdapter.restoreDataFromBundle(savedInstanceState, LAST_SEARCH_RESULT_LIST_BUNDLE_KEY);
-
-            if(savedInstanceState.containsKey(LAST_SCROLL_SCROLL_POSITION_BUNDLE_KEY)){
-                positionToRestoreScrollTo = savedInstanceState.getInt(LAST_SCROLL_SCROLL_POSITION_BUNDLE_KEY);
-            }
-        }
-
         return view;
     }
 
 
     @Override
-    public void onResume() {
-        super.onResume();
-        artistSearchResultsRecycler.scrollToPosition(positionToRestoreScrollTo);
+    public void onActivityCreated(Bundle savedInstanceState) {
+        super.onActivityCreated(savedInstanceState);
+
+        if(savedInstanceState != null && savedInstanceState.containsKey(LAST_SEARCH_RESULT_LIST_BUNDLE_KEY)){
+            searchResultsAdapter.restoreDataFromBundle(savedInstanceState, LAST_SEARCH_RESULT_LIST_BUNDLE_KEY);
+
+            if(savedInstanceState.containsKey(LAST_SCROLL_SCROLL_POSITION_BUNDLE_KEY)){
+                artistSearchResultsRecycler.scrollToPosition(savedInstanceState.getInt(LAST_SCROLL_SCROLL_POSITION_BUNDLE_KEY));
+            }
+        }
     }
 
 
