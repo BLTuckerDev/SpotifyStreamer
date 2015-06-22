@@ -30,10 +30,13 @@ import kaaes.spotify.webapi.android.models.Tracks;
 public final class TrackListFragment extends Fragment {
 
     private static final String TOP_TRACKS_LIST_BUNDLE_KEY = "topTracks";
+    private static final String LAST_SCROLL_SCROLL_POSITION_BUNDLE_KEY = "scrollPosition";
 
     private static final String ARTIST_ID = "artistId";
 
     private TrackListAdapter trackListAdapter;
+
+    private int positionToRestoreScrollTo;
 
     @InjectView(R.id.track_list_recycler_view)
     RecyclerView trackListRecycler;
@@ -53,6 +56,20 @@ public final class TrackListFragment extends Fragment {
 
 
     @Override
+    public void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
+        LinearLayoutManager layoutManager = (LinearLayoutManager) this.trackListRecycler.getLayoutManager();
+
+        if(layoutManager != null){
+            outState.putInt(LAST_SCROLL_SCROLL_POSITION_BUNDLE_KEY, layoutManager.findFirstCompletelyVisibleItemPosition());
+        }
+
+        trackListAdapter.saveDataToBundle(outState, TOP_TRACKS_LIST_BUNDLE_KEY);
+    }
+
+
+
+    @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
 
         View view = inflater.inflate(R.layout.fragment_artist_track_list, container, false);
@@ -65,11 +82,23 @@ public final class TrackListFragment extends Fragment {
 
         if(savedInstanceState != null && savedInstanceState.containsKey(TOP_TRACKS_LIST_BUNDLE_KEY)){
             this.trackListAdapter.restoreDataFromBundle(savedInstanceState, TOP_TRACKS_LIST_BUNDLE_KEY);
+
+            if(savedInstanceState.containsKey(LAST_SCROLL_SCROLL_POSITION_BUNDLE_KEY)){
+                this.positionToRestoreScrollTo = savedInstanceState.getInt(LAST_SCROLL_SCROLL_POSITION_BUNDLE_KEY);
+            }
+
         } else {
             this.getTracksInBackground();
         }
 
         return view;
+    }
+
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        trackListRecycler.scrollToPosition(positionToRestoreScrollTo);
     }
 
 
@@ -85,8 +114,6 @@ public final class TrackListFragment extends Fragment {
 
         @Override
         protected List<TrackItem> doInBackground(String... params) {
-
-            Log.d("LOG", "Firing network task to get tracks");
 
             try{
                 SpotifyApi api = new SpotifyApi();

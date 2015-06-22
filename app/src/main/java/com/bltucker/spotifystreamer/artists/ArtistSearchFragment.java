@@ -50,6 +50,8 @@ public final class ArtistSearchFragment extends Fragment implements TextWatcher 
 
     private ArtistSearchResultAdapter searchResultsAdapter;
 
+    private int positionToRestoreScrollTo;
+
     public ArtistSearchFragment() {
         scheduledSearchHandler = new Handler(Looper.getMainLooper());
         this.searchResultsAdapter = new ArtistSearchResultAdapter();
@@ -58,18 +60,17 @@ public final class ArtistSearchFragment extends Fragment implements TextWatcher 
 
     @Override
     public void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
         outState.putString(LAST_SEARCH_QUERY_BUNDLE_KEY, lastSearchQuery);
 
         LinearLayoutManager layoutManager = (LinearLayoutManager) this.artistSearchResultsRecycler.getLayoutManager();
 
         if(layoutManager != null){
-            outState.putInt(LAST_SCROLL_SCROLL_POSITION_BUNDLE_KEY, layoutManager.findLastVisibleItemPosition());
+            outState.putInt(LAST_SCROLL_SCROLL_POSITION_BUNDLE_KEY, layoutManager.findFirstCompletelyVisibleItemPosition());
         }
 
-        ArtistSearchResultAdapter searchResultAdapter = (ArtistSearchResultAdapter) artistSearchResultsRecycler.getAdapter();
-        searchResultAdapter.saveDataToBundle(outState, LAST_SEARCH_RESULT_LIST_BUNDLE_KEY);
+        searchResultsAdapter.saveDataToBundle(outState, LAST_SEARCH_RESULT_LIST_BUNDLE_KEY);
 
-        super.onSaveInstanceState(outState);
     }
 
 
@@ -95,15 +96,18 @@ public final class ArtistSearchFragment extends Fragment implements TextWatcher 
             searchResultsAdapter.restoreDataFromBundle(savedInstanceState, LAST_SEARCH_RESULT_LIST_BUNDLE_KEY);
 
             if(savedInstanceState.containsKey(LAST_SCROLL_SCROLL_POSITION_BUNDLE_KEY)){
-                int scrollPosition = savedInstanceState.getInt(LAST_SCROLL_SCROLL_POSITION_BUNDLE_KEY);
-                if(scrollPosition < layoutManager.getChildCount()){
-                    layoutManager.scrollToPosition(scrollPosition);
-                }
+                positionToRestoreScrollTo = savedInstanceState.getInt(LAST_SCROLL_SCROLL_POSITION_BUNDLE_KEY);
             }
         }
 
-
         return view;
+    }
+
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        artistSearchResultsRecycler.scrollToPosition(positionToRestoreScrollTo);
     }
 
 

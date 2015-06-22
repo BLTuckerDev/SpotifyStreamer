@@ -26,10 +26,15 @@ public class TrackListActivity extends Activity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_track_list);
 
-        if(getIntent().getExtras() != null && getIntent().getExtras().containsKey(ARTIST_ID_INTENT_KEY)){
-            String artistId = getIntent().getStringExtra(ARTIST_ID_INTENT_KEY);
-            getFragmentManager().beginTransaction().replace(R.id.track_list_activity_frame, TrackListFragment.newInstance(artistId)).commit();
+        if(null == savedInstanceState){
+
+            if(getIntent().getExtras() != null && getIntent().getExtras().containsKey(ARTIST_ID_INTENT_KEY)){
+                String artistId = getIntent().getStringExtra(ARTIST_ID_INTENT_KEY);
+                getFragmentManager().beginTransaction().replace(R.id.track_list_activity_frame, TrackListFragment.newInstance(artistId)).commit();
+            }
+
         }
+
     }
 
 }
