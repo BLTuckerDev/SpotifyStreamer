@@ -1,6 +1,5 @@
 package com.bltucker.spotifystreamer.artists;
 
-import android.content.Intent;
 import android.os.Bundle;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
@@ -63,9 +62,6 @@ final class ArtistSearchResultAdapter extends RecyclerView.Adapter<ArtistSearchR
     public int getItemCount() {
         return this.searchResults.size();
     }
-
-
-
 
 
 
