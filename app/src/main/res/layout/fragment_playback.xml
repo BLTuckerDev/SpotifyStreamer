@@ -91,7 +91,17 @@
 
 
         <Button
-            android:id="@+id/playback_foward_button"
+            android:id="@+id/playback_pause_button"
+            android:layout_width="48dp"
+            android:layout_height="48dp"
+            android:background="@android:drawable/ic_media_pause"
+            android:visibility="invisible"
+            android:layout_centerInParent="true"/>
+
+
+
+        <Button
+            android:id="@+id/playback_forward_button"
             android:layout_width="48dp"
             android:layout_height="48dp"
             android:layout_alignParentRight="true"
