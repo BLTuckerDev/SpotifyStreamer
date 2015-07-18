@@ -10,6 +10,7 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.bltucker.spotifystreamer.R;
+import com.bltucker.spotifystreamer.playback.PlaybackActivity;
 import com.squareup.picasso.Picasso;
 
 import java.util.ArrayList;
@@ -77,6 +78,15 @@ final class TrackListAdapter extends RecyclerView.Adapter<TrackListAdapter.ViewH
 
         public ViewHolder(View itemView) {
             super(itemView);
+
+            itemView.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    List<TrackItem> tracks = TrackListAdapter.this.tracks;
+                    TrackItem selectedTrack = tracks.get(getLayoutPosition());
+                    PlaybackActivity.launch(v.getContext(), selectedTrack, tracks);
+                }
+            });
 
             this.trackThumbnailImageView = (ImageView) itemView.findViewById(R.id.track_item_thumbnail);
             this.trackTitleTextView = (TextView) itemView.findViewById(R.id.track_item_track_title);
