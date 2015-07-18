@@ -3,7 +3,7 @@ package com.bltucker.spotifystreamer.tracks;
 import android.os.Parcel;
 import android.os.Parcelable;
 
-final class TrackItem implements Parcelable{
+public final class TrackItem implements Parcelable{
 
     public final String trackThumbnailurl;
     public final String trackTitle;
