@@ -8,7 +8,10 @@ import android.net.Uri;
 import android.os.Binder;
 import android.os.IBinder;
 import android.os.PowerManager;
+import android.widget.Toast;
 
+
+import com.bltucker.spotifystreamer.R;
 
 import java.io.IOException;
 
@@ -82,7 +85,11 @@ public class PlaybackService extends Service implements MediaPlayer.OnPreparedLi
 
     @Override
     public boolean onError(MediaPlayer mp, int what, int extra) {
-        return false;
+
+        Toast.makeText(this, getString(R.string.media_player_error), Toast.LENGTH_LONG).show();
+        mp.reset();
+
+        return true;
     }
 
 
