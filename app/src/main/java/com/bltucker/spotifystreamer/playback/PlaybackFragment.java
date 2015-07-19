@@ -8,8 +8,11 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.Toast;
 
+import com.bltucker.spotifystreamer.EventBus;
 import com.bltucker.spotifystreamer.R;
+import com.squareup.otto.Subscribe;
 
 import butterknife.ButterKnife;
 import butterknife.InjectView;
@@ -82,6 +85,7 @@ public class PlaybackFragment extends Fragment {
         super.onAttach(activity);
         try {
             fragmentListener = (PlaybackFragmentListener) activity;
+            EventBus.getEventBus().register(this);
         } catch (ClassCastException e) {
             throw new ClassCastException(activity.toString() + " must implement OnFragmentInteractionListener");
         }
@@ -91,7 +95,15 @@ public class PlaybackFragment extends Fragment {
     @Override
     public void onDetach() {
         super.onDetach();
+        EventBus.getEventBus().unregister(this);
         fragmentListener = null;
+    }
+
+
+    @Subscribe
+    public void onPlaybackSessionTrackChangeEvent(PlaybackSessionCurrentTrackChangeEvent event){
+        Toast.makeText(getActivity(), "Track change!", Toast.LENGTH_SHORT).show();
+        //TODO use the event to update our UI
     }
 
 

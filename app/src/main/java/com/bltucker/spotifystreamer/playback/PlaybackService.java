@@ -29,6 +29,8 @@ public class PlaybackService extends Service implements MediaPlayer.OnPreparedLi
 
     }
 
+    //TODO handle playback session change event
+    //TODO lets use the current track change events as well rather relying on the activity to tell us what to do.
 
     private final IBinder serviceBinder = new PlaybackServiceBinder();
 

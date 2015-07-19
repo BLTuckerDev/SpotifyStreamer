@@ -1,5 +1,6 @@
 package com.bltucker.spotifystreamer.playback;
 
+import com.bltucker.spotifystreamer.EventBus;
 import com.bltucker.spotifystreamer.tracks.TrackItem;
 
 import java.util.ArrayList;
@@ -15,8 +16,17 @@ public final class PlaybackSession {
 
 
     public static void startNewSession(TrackItem selectedTrackItem, List<TrackItem> trackList){
+
+        if(currentSession != null){
+            EventBus.getEventBus().unregister(currentSession);
+        }
+
         currentSession = new PlaybackSession(selectedTrackItem, trackList);
-        //TODO use an event bus to notify what just happened. probably Otto
+
+        EventBus.getEventBus().register(currentSession);
+
+        EventBus.getEventBus().fireEvent(new PlaybackSessionChangeEvent());
+
     }
 
     private TrackItem currentTrack;
@@ -30,9 +40,7 @@ public final class PlaybackSession {
 
 
     private void setCurrentTrack(TrackItem track){
-        //TODO use event bus to notify of a change event
-        //service cares
-        //playback fragment cares
+        EventBus.getEventBus().fireEvent(new PlaybackSessionCurrentTrackChangeEvent(this.currentTrack, track));
         this.currentTrack = track;
     }
 
