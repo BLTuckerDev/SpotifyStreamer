@@ -21,24 +21,16 @@ import kaaes.spotify.webapi.android.models.Track;
 
 public class PlaybackActivity extends Activity implements PlaybackFragment.PlaybackFragmentListener{
 
-    private static final String SONG_LIST_INTENT_KEY = "songs";
-    private static final String SELECTED_TRACK = "selectedTrack";
-
     private static final String LOG_TAG = PlaybackActivity.class.getSimpleName();
 
-
-    public static void launch(Context context, TrackItem selectedTrack, List<TrackItem> tracks){
+    public static void launch(Context context){
         Intent intent = new Intent(context, PlaybackActivity.class);
-        intent.putParcelableArrayListExtra(SONG_LIST_INTENT_KEY, new ArrayList<>(tracks));
-        intent.putExtra(SELECTED_TRACK, selectedTrack);
         context.startActivity(intent);
     }
 
-
     private PlaybackServiceConnection playbackServiceConnection = new PlaybackServiceConnection();
 
-    private List<TrackItem> trackList;
-    private TrackItem currentTrack;
+    //region ActivityLifecycle
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -46,27 +38,11 @@ public class PlaybackActivity extends Activity implements PlaybackFragment.Playb
         setContentView(R.layout.activity_playback);
 
         if(null == savedInstanceState){
-            if(isValidIntent()){
-                this.trackList = getIntent().getExtras().getParcelableArrayList(SONG_LIST_INTENT_KEY);
-                this.currentTrack = (TrackItem) getIntent().getExtras().get(SELECTED_TRACK);
-                getFragmentManager().beginTransaction().replace(R.id.playback_activity_frame_container, PlaybackFragment.newInstance()).commit();
-            }
+            getFragmentManager().beginTransaction().replace(R.id.playback_activity_frame_container, PlaybackFragment.newInstance()).commit();
         }
 
     }
 
-    private boolean isValidIntent(){
-
-        if(getIntent().getExtras() == null){
-            return false;
-        }
-
-        boolean containsTrackList = getIntent().getExtras().containsKey(SONG_LIST_INTENT_KEY);
-        boolean containsSelectedTrack = getIntent().getExtras().containsKey(SELECTED_TRACK);
-
-        return containsTrackList && containsSelectedTrack;
-
-    }
 
     @Override
     protected void onStart() {
@@ -84,55 +60,19 @@ public class PlaybackActivity extends Activity implements PlaybackFragment.Playb
         super.onDestroy();
     }
 
+    //endregion
 
-    @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        // Inflate the menu; this adds items to the action bar if it is present.
-        getMenuInflater().inflate(R.menu.menu_playback, menu);
-        return true;
-    }
-
-
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        // Handle action bar item clicks here. The action bar will
-        // automatically handle clicks on the Home/Up button, so long
-        // as you specify a parent activity in AndroidManifest.xml.
-        int id = item.getItemId();
-
-        //noinspection SimplifiableIfStatement
-        if (id == R.id.action_settings) {
-            return true;
-        }
-
-        return super.onOptionsItemSelected(item);
-    }
-
+    //region FragmentListenerMethods
 
     @Override
     public void onBackButtonClick() {
-
-        int indexOfPreviousTrack = this.trackList.indexOf(currentTrack) - 1;
-
-        if(indexOfPreviousTrack < 0){
-            indexOfPreviousTrack = this.trackList.size() -1;
-        }
-
-        TrackItem previousTrack = this.trackList.get(indexOfPreviousTrack);
-        this.playTrack(previousTrack);
+        this.playTrack(PlaybackSession.getCurrentSession().returnToPreviousTrack());
     }
 
 
     @Override
     public void onForwardButtonClick() {
-
-        int indexOfNextTrack = this.trackList.indexOf(currentTrack) + 1;
-
-        if(indexOfNextTrack >= this.trackList.size()){
-            indexOfNextTrack = 0;
-        }
-
-        this.playTrack(this.trackList.get(indexOfNextTrack));
+        this.playTrack(PlaybackSession.getCurrentSession().advanceToNextTrack());
     }
 
 
@@ -143,7 +83,7 @@ public class PlaybackActivity extends Activity implements PlaybackFragment.Playb
         if(playbackService.isPlaying()){
             playbackService.resumeSong();
         } else {
-            this.playTrack(currentTrack);
+            this.playTrack(PlaybackSession.getCurrentSession().getCurrentTrack());
         }
     }
 
@@ -153,18 +93,17 @@ public class PlaybackActivity extends Activity implements PlaybackFragment.Playb
         this.playbackServiceConnection.getBoundService().pauseSong();
     }
 
+    //endregion
+
 
     private void playTrack(TrackItem track){
-        //send info to the fragment.
+        //TODO tell fragment to update UI
 
         try {
             this.playbackServiceConnection.getBoundService().playSong(Uri.parse(track.previewUrl));
-            this.currentTrack = track;
-
         } catch (IOException e) {
             Log.e(LOG_TAG, Log.getStackTraceString(e));
         }
     }
-
 
 }
