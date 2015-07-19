@@ -11,6 +11,7 @@ import android.widget.TextView;
 
 import com.bltucker.spotifystreamer.R;
 import com.bltucker.spotifystreamer.playback.PlaybackActivity;
+import com.bltucker.spotifystreamer.playback.PlaybackSession;
 import com.squareup.picasso.Picasso;
 
 import java.util.ArrayList;
@@ -84,7 +85,9 @@ final class TrackListAdapter extends RecyclerView.Adapter<TrackListAdapter.ViewH
                 public void onClick(View v) {
                     List<TrackItem> tracks = TrackListAdapter.this.tracks;
                     TrackItem selectedTrack = tracks.get(getLayoutPosition());
-                    PlaybackActivity.launch(v.getContext(), selectedTrack, tracks);
+
+                    PlaybackSession.startNewSession(selectedTrack, tracks);
+                    PlaybackActivity.launch(v.getContext());
                 }
             });
 
