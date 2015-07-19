@@ -31,6 +31,8 @@ public final class PlaybackSession {
 
     private void setCurrentTrack(TrackItem track){
         //TODO use event bus to notify of a change event
+        //service cares
+        //playback fragment cares
         this.currentTrack = track;
     }
 

@@ -97,8 +97,6 @@ public class PlaybackActivity extends Activity implements PlaybackFragment.Playb
 
 
     private void playTrack(TrackItem track){
-        //TODO tell fragment to update UI
-
         try {
             this.playbackServiceConnection.getBoundService().playSong(Uri.parse(track.previewUrl));
         } catch (IOException e) {

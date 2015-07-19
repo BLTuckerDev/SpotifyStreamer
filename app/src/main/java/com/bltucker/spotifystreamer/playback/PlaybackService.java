@@ -8,14 +8,18 @@ import android.net.Uri;
 import android.os.Binder;
 import android.os.IBinder;
 import android.os.PowerManager;
+import android.util.Log;
 import android.widget.Toast;
 
 
 import com.bltucker.spotifystreamer.R;
+import com.bltucker.spotifystreamer.tracks.TrackItem;
 
 import java.io.IOException;
 
 public class PlaybackService extends Service implements MediaPlayer.OnPreparedListener, MediaPlayer.OnErrorListener, MediaPlayer.OnCompletionListener {
+
+    private static final String LOG_TAG = PlaybackService.class.getSimpleName();
 
     public class PlaybackServiceBinder extends Binder {
 
@@ -79,7 +83,12 @@ public class PlaybackService extends Service implements MediaPlayer.OnPreparedLi
 
     @Override
     public void onCompletion(MediaPlayer mp) {
-
+        TrackItem nextTrack = PlaybackSession.getCurrentSession().advanceToNextTrack();
+        try {
+            this.playSong(Uri.parse(nextTrack.previewUrl));
+        } catch (IOException e) {
+            Log.e(LOG_TAG, Log.getStackTraceString(e));
+        }
     }
 
 
