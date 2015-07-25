@@ -127,7 +127,8 @@ public final class TrackListFragment extends Fragment {
                     if(!track.album.images.isEmpty()){
 
                         String thumbnailUrl = track.album.images.get(track.album.images.size()-1).url;
-                        tracks.add(new TrackItem(thumbnailUrl, track.name, track.album.name, track.preview_url));
+                        String nowPlayingUrl = track.album.images.get(0).url;
+                        tracks.add(new TrackItem(thumbnailUrl, nowPlayingUrl, track.name, track.album.name, track.artists.get(0).name, track.preview_url));
                     }
                 }
 
