@@ -25,7 +25,7 @@ public final class PlaybackSession {
 
         EventBus.getEventBus().register(currentSession);
 
-        EventBus.getEventBus().fireEvent(new PlaybackSessionChangeEvent());
+        EventBus.getEventBus().fireEvent(new NewPlaybackSessionStartedEvent());
 
     }
 

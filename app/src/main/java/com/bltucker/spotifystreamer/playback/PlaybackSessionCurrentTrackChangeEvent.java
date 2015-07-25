@@ -4,12 +4,21 @@ import com.bltucker.spotifystreamer.tracks.TrackItem;
 
 public class PlaybackSessionCurrentTrackChangeEvent {
 
-    public final TrackItem previousTrack;
-    public final TrackItem currentTrack;
+    private final TrackItem previousTrack;
+    private final TrackItem currentTrack;
 
     public PlaybackSessionCurrentTrackChangeEvent(TrackItem previousTrack, TrackItem currentTrack){
         this.previousTrack = previousTrack;
         this.currentTrack = currentTrack;
     }
 
+
+    public TrackItem getPreviousTrack() {
+        return previousTrack;
+    }
+
+
+    public TrackItem getCurrentTrack() {
+        return currentTrack;
+    }
 }

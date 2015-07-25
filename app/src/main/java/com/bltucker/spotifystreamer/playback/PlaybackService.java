@@ -6,12 +6,14 @@ import android.media.AudioManager;
 import android.media.MediaPlayer;
 import android.net.Uri;
 import android.os.Binder;
+import android.os.Handler;
 import android.os.IBinder;
 import android.os.PowerManager;
 import android.util.Log;
 import android.widget.Toast;
 
 
+import com.bltucker.spotifystreamer.EventBus;
 import com.bltucker.spotifystreamer.R;
 import com.bltucker.spotifystreamer.tracks.TrackItem;
 
@@ -35,6 +37,9 @@ public class PlaybackService extends Service implements MediaPlayer.OnPreparedLi
     private final IBinder serviceBinder = new PlaybackServiceBinder();
 
     private MediaPlayer mediaPlayer;
+    private boolean isPaused = false;
+
+    private final Handler playbackTimeHandler = new Handler();
 
     public PlaybackService() {    }
 
@@ -64,6 +69,7 @@ public class PlaybackService extends Service implements MediaPlayer.OnPreparedLi
 
     public void playSong(Uri songUri) throws IOException {
         this.mediaPlayer.reset();
+        this.isPaused = false;
         this.mediaPlayer.setDataSource(getApplicationContext(), songUri);
         this.mediaPlayer.prepareAsync();
     }
@@ -71,13 +77,20 @@ public class PlaybackService extends Service implements MediaPlayer.OnPreparedLi
 
     public void pauseSong(){
         this.mediaPlayer.pause();
+        this.isPaused = true;
     }
 
 
     public void resumeSong(){
         this.mediaPlayer.start();
+        this.startPlaybackUpdates(this.mediaPlayer);
+        this.isPaused = false;
     }
 
+
+    public boolean isPaused(){
+        return this.isPaused;
+    }
 
     public boolean isPlaying(){
         return this.mediaPlayer.isPlaying();
@@ -107,5 +120,23 @@ public class PlaybackService extends Service implements MediaPlayer.OnPreparedLi
     @Override
     public void onPrepared(MediaPlayer mp) {
         mp.start();
+        this.startPlaybackUpdates(mp);
+    }
+
+
+    private void startPlaybackUpdates(final MediaPlayer mediaPlayer){
+
+        playbackTimeHandler.postDelayed(new Runnable() {
+            @Override
+            public void run() {
+
+                if(mediaPlayer.isPlaying()){
+                    //update the time and post again
+                    EventBus.getEventBus().fireEvent(new PlaybackStatusUpdateEvent(mediaPlayer.getCurrentPosition()));
+                    playbackTimeHandler.postDelayed(this, 500);
+                }
+            }
+        }, 500);
+
     }
 }
