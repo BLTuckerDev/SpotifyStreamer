@@ -80,7 +80,7 @@ public class PlaybackActivity extends Activity implements PlaybackFragment.Playb
     public void onPlayButtonClick() {
         PlaybackService playbackService = this.playbackServiceConnection.getBoundService();
 
-        if(playbackService.isPlaying()){
+        if(playbackService.isPaused()){
             playbackService.resumeSong();
         } else {
             this.playTrack(PlaybackSession.getCurrentSession().getCurrentTrack());
