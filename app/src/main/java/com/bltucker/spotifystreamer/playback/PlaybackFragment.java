@@ -5,23 +5,22 @@ import android.app.DialogFragment;
 import android.content.DialogInterface;
 import android.net.Uri;
 import android.os.Bundle;
-import android.app.Fragment;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Button;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.bltucker.spotifystreamer.EventBus;
 import com.bltucker.spotifystreamer.R;
 import com.bltucker.spotifystreamer.tracks.TrackItem;
 import com.squareup.otto.Subscribe;
 import com.squareup.picasso.Picasso;
+
+import java.io.IOException;
 
 import butterknife.ButterKnife;
 import butterknife.InjectView;
@@ -33,7 +32,8 @@ public class PlaybackFragment extends DialogFragment {
 
     private static final String LOG_TAG = PlaybackFragment.class.getSimpleName();
 
-    private PlaybackFragmentListener fragmentListener;
+    private PlaybackServiceConnectionProvider fragmentListener;
+    private PlaybackServiceConnection playbackServiceConnection;
 
     @InjectView(R.id.playback_back_button)
     ImageButton backButton;
@@ -96,13 +96,27 @@ public class PlaybackFragment extends DialogFragment {
 
     @OnClick(R.id.playback_back_button)
     public void onBackButtonClick(){
-        this.fragmentListener.onBackButtonClick();
+        if(this.playbackServiceConnectionIsReady()){
+            this.playTrack(PlaybackSession.getCurrentSession().returnToPreviousTrack());
+        }
     }
 
 
     @OnClick(R.id.playback_play_button)
     public void onPlayButtonClick(){
-        this.fragmentListener.onPlayButtonClick();
+
+        if(this.playbackServiceConnectionIsReady()){
+
+            PlaybackService playbackService = this.playbackServiceConnection.getBoundService();
+
+            if(playbackService.isPaused()){
+                playbackService.resumeSong();
+            } else {
+                this.playTrack(PlaybackSession.getCurrentSession().getCurrentTrack());
+            }
+
+        }
+
         this.pauseButton.setVisibility(View.VISIBLE);
         this.playButton.setVisibility(View.INVISIBLE);
     }
@@ -110,7 +124,11 @@ public class PlaybackFragment extends DialogFragment {
 
     @OnClick(R.id.playback_pause_button)
     public void onPauseButtonClick(){
-        this.fragmentListener.onPauseButtonClick();
+
+        if(this.playbackServiceConnectionIsReady()){
+            this.playbackServiceConnection.getBoundService().pauseSong();
+        }
+
         this.pauseButton.setVisibility(View.INVISIBLE);
         this.playButton.setVisibility(View.VISIBLE);
     }
@@ -118,7 +136,9 @@ public class PlaybackFragment extends DialogFragment {
 
     @OnClick(R.id.playback_forward_button)
     public void onForwardButtonClick(){
-        this.fragmentListener.onForwardButtonClick();
+        if(this.playbackServiceConnectionIsReady()){
+            this.playTrack(PlaybackSession.getCurrentSession().advanceToNextTrack());
+        }
     }
 
 
@@ -126,7 +146,8 @@ public class PlaybackFragment extends DialogFragment {
     public void onAttach(Activity activity) {
         super.onAttach(activity);
         try {
-            fragmentListener = (PlaybackFragmentListener) activity;
+            fragmentListener = (PlaybackServiceConnectionProvider) activity;
+            playbackServiceConnection = fragmentListener.getPlaybackServiceConnection();
             EventBus.getEventBus().register(this);
         } catch (ClassCastException e) {
             throw new ClassCastException(activity.toString() + " must implement OnFragmentInteractionListener");
@@ -139,6 +160,24 @@ public class PlaybackFragment extends DialogFragment {
         super.onDetach();
         EventBus.getEventBus().unregister(this);
         fragmentListener = null;
+        playbackServiceConnection = null;
+    }
+
+
+    private boolean playbackServiceConnectionIsReady(){
+        return this.playbackServiceConnection != null && this.playbackServiceConnection.isActive();
+    }
+
+    private void playTrack(TrackItem track){
+        try {
+
+            if(this.playbackServiceConnectionIsReady()){
+                this.playbackServiceConnection.getBoundService().playSong(Uri.parse(track.previewUrl));
+            }
+
+        } catch (IOException e) {
+            Log.e(LOG_TAG, Log.getStackTraceString(e));
+        }
     }
 
     @Subscribe
@@ -174,21 +213,9 @@ public class PlaybackFragment extends DialogFragment {
     public void onDismiss(DialogInterface dialog) {
         super.onDismiss(dialog);
 
-        if(fragmentListener != null){
-            this.fragmentListener.onFragmentDismissed();
+        if(this.playbackServiceConnectionIsReady()){
+            this.playbackServiceConnection.getBoundService().stopSong();
         }
-    }
-
-
-
-
-
-    public interface PlaybackFragmentListener {
-        void onBackButtonClick();
-        void onForwardButtonClick();
-        void onPlayButtonClick();
-        void onPauseButtonClick();
-        void onFragmentDismissed();
     }
 
 }
