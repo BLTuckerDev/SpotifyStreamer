@@ -3,28 +3,24 @@ package com.bltucker.spotifystreamer.artists;
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
-import android.net.Uri;
 import android.os.Bundle;
-import android.util.Log;
 
 import com.bltucker.spotifystreamer.R;
 import com.bltucker.spotifystreamer.playback.PlaybackActivity;
 import com.bltucker.spotifystreamer.playback.PlaybackFragment;
 import com.bltucker.spotifystreamer.playback.PlaybackService;
 import com.bltucker.spotifystreamer.playback.PlaybackServiceConnection;
+import com.bltucker.spotifystreamer.playback.PlaybackServiceConnectionProvider;
 import com.bltucker.spotifystreamer.playback.PlaybackSession;
 import com.bltucker.spotifystreamer.tracks.TrackItem;
 import com.bltucker.spotifystreamer.tracks.TrackListActivity;
 import com.bltucker.spotifystreamer.tracks.TrackListFragment;
 
-import java.io.IOException;
 import java.util.List;
 
 
 public class ArtistSearchActivity extends Activity implements ArtistSearchFragment.OnFragmentInteractionListener,
-        TrackListFragment.OnFragmentInteractionListener, PlaybackFragment.PlaybackFragmentListener {
-
-    private static final String LOG_TAG = ArtistSearchActivity.class.getSimpleName();
+        TrackListFragment.OnFragmentInteractionListener, PlaybackServiceConnectionProvider {
 
     private boolean twoPaneMode = false;
 
@@ -67,7 +63,6 @@ public class ArtistSearchActivity extends Activity implements ArtistSearchFragme
             TrackListActivity.launch(this, artistId);
         }
 
-
     }
 
 
@@ -87,46 +82,8 @@ public class ArtistSearchActivity extends Activity implements ArtistSearchFragme
 
 
     @Override
-    public void onBackButtonClick() {
-        this.playTrack(PlaybackSession.getCurrentSession().returnToPreviousTrack());
+    public PlaybackServiceConnection getPlaybackServiceConnection() {
+        return this.playbackServiceConnection;
     }
 
-
-    @Override
-    public void onForwardButtonClick() {
-        this.playTrack(PlaybackSession.getCurrentSession().advanceToNextTrack());
-    }
-
-
-    @Override
-    public void onPlayButtonClick() {
-        PlaybackService playbackService = this.playbackServiceConnection.getBoundService();
-
-        if(playbackService.isPaused()){
-            playbackService.resumeSong();
-        } else {
-            this.playTrack(PlaybackSession.getCurrentSession().getCurrentTrack());
-        }
-    }
-
-
-    @Override
-    public void onPauseButtonClick() {
-        this.playbackServiceConnection.getBoundService().pauseSong();
-    }
-
-
-    @Override
-    public void onFragmentDismissed() {
-        this.playbackServiceConnection.getBoundService().stopSong();
-    }
-
-
-    private void playTrack(TrackItem track){
-        try {
-            this.playbackServiceConnection.getBoundService().playSong(Uri.parse(track.previewUrl));
-        } catch (IOException e) {
-            Log.e(LOG_TAG, Log.getStackTraceString(e));
-        }
-    }
 }

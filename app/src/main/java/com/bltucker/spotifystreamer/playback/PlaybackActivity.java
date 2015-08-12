@@ -3,25 +3,11 @@ package com.bltucker.spotifystreamer.playback;
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
-import android.net.Uri;
 import android.os.Bundle;
-import android.os.Parcelable;
-import android.util.Log;
-import android.view.Menu;
-import android.view.MenuItem;
 
 import com.bltucker.spotifystreamer.R;
-import com.bltucker.spotifystreamer.tracks.TrackItem;
 
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
-
-import kaaes.spotify.webapi.android.models.Track;
-
-public class PlaybackActivity extends Activity implements PlaybackFragment.PlaybackFragmentListener{
-
-    private static final String LOG_TAG = PlaybackActivity.class.getSimpleName();
+public class PlaybackActivity extends Activity implements PlaybackServiceConnectionProvider {
 
     public static void launch(Context context){
         Intent intent = new Intent(context, PlaybackActivity.class);
@@ -62,52 +48,8 @@ public class PlaybackActivity extends Activity implements PlaybackFragment.Playb
 
     //endregion
 
-    //region FragmentListenerMethods
-
     @Override
-    public void onBackButtonClick() {
-        this.playTrack(PlaybackSession.getCurrentSession().returnToPreviousTrack());
+    public PlaybackServiceConnection getPlaybackServiceConnection() {
+        return this.playbackServiceConnection;
     }
-
-
-    @Override
-    public void onForwardButtonClick() {
-        this.playTrack(PlaybackSession.getCurrentSession().advanceToNextTrack());
-    }
-
-
-    @Override
-    public void onPlayButtonClick() {
-        PlaybackService playbackService = this.playbackServiceConnection.getBoundService();
-
-        if(playbackService.isPaused()){
-            playbackService.resumeSong();
-        } else {
-            this.playTrack(PlaybackSession.getCurrentSession().getCurrentTrack());
-        }
-    }
-
-
-    @Override
-    public void onPauseButtonClick() {
-        this.playbackServiceConnection.getBoundService().pauseSong();
-    }
-
-
-    @Override
-    public void onFragmentDismissed() {
-        //nothing to do.
-    }
-
-    //endregion
-
-
-    private void playTrack(TrackItem track){
-        try {
-            this.playbackServiceConnection.getBoundService().playSong(Uri.parse(track.previewUrl));
-        } catch (IOException e) {
-            Log.e(LOG_TAG, Log.getStackTraceString(e));
-        }
-    }
-
 }
