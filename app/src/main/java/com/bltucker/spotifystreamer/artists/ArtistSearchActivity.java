@@ -32,7 +32,6 @@ public class ArtistSearchActivity extends Activity implements ArtistSearchFragme
         setContentView(R.layout.activity_main);
 
         if(findViewById(R.id.main_activity_track_list_fragment) != null){
-
             twoPaneMode = true;
         }
     }

@@ -6,8 +6,12 @@ import android.content.Intent;
 import android.os.Bundle;
 
 import com.bltucker.spotifystreamer.R;
+import com.bltucker.spotifystreamer.playback.PlaybackActivity;
+import com.bltucker.spotifystreamer.playback.PlaybackSession;
 
-public class TrackListActivity extends Activity {
+import java.util.List;
+
+public class TrackListActivity extends Activity implements TrackListFragment.OnFragmentInteractionListener {
 
     private static final String ARTIST_ID_INTENT_KEY = "artistId";
 
@@ -35,4 +39,10 @@ public class TrackListActivity extends Activity {
 
     }
 
+
+    @Override
+    public void onTrackSelected(TrackItem selectedTrack, List<TrackItem> tracks) {
+        PlaybackSession.startNewSession(selectedTrack, tracks);
+        PlaybackActivity.launch(this);
+    }
 }
