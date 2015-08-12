@@ -88,6 +88,11 @@ public class PlaybackService extends Service implements MediaPlayer.OnPreparedLi
     }
 
 
+    public void stopSong(){
+        this.isPaused = false;
+        this.mediaPlayer.stop();
+    }
+
     public boolean isPaused(){
         return this.isPaused;
     }
@@ -112,7 +117,6 @@ public class PlaybackService extends Service implements MediaPlayer.OnPreparedLi
 
         Toast.makeText(this, getString(R.string.media_player_error), Toast.LENGTH_LONG).show();
         mp.reset();
-
         return true;
     }
 

@@ -1,5 +1,6 @@
 package com.bltucker.spotifystreamer.artists;
 
+import android.app.Activity;
 import android.app.Fragment;
 import android.os.AsyncTask;
 import android.os.Bundle;
@@ -29,7 +30,13 @@ import kaaes.spotify.webapi.android.models.Artist;
 import kaaes.spotify.webapi.android.models.ArtistsPager;
 
 
-public final class ArtistSearchFragment extends Fragment implements TextWatcher {
+public final class ArtistSearchFragment extends Fragment implements TextWatcher, ArtistSearchResultAdapter.OnClickListener {
+
+
+    public interface OnFragmentInteractionListener {
+        void onArtistSelected(String artistId);
+    }
+
 
     private static final String LAST_SEARCH_QUERY_BUNDLE_KEY = "lastSearchQuery";
     private static final String LAST_SCROLL_SCROLL_POSITION_BUNDLE_KEY = "scrollPosition";
@@ -49,9 +56,11 @@ public final class ArtistSearchFragment extends Fragment implements TextWatcher 
 
     private ArtistSearchResultAdapter searchResultsAdapter;
 
+    private OnFragmentInteractionListener fragmentInteractionListener;
+
     public ArtistSearchFragment() {
         scheduledSearchHandler = new Handler(Looper.getMainLooper());
-        this.searchResultsAdapter = new ArtistSearchResultAdapter();
+        this.searchResultsAdapter = new ArtistSearchResultAdapter(this);
     }
 
 
@@ -68,6 +77,18 @@ public final class ArtistSearchFragment extends Fragment implements TextWatcher 
 
         searchResultsAdapter.saveDataToBundle(outState, LAST_SEARCH_RESULT_LIST_BUNDLE_KEY);
 
+    }
+
+
+    @Override
+    public void onAttach(Activity activity) {
+        super.onAttach(activity);
+        try {
+            fragmentInteractionListener = (OnFragmentInteractionListener) activity;
+        } catch (ClassCastException e) {
+            throw new ClassCastException(activity.toString()
+                    + " must implement OnFragmentInteractionListener");
+        }
     }
 
 
@@ -115,6 +136,13 @@ public final class ArtistSearchFragment extends Fragment implements TextWatcher 
 
 
     @Override
+    public void onDetach() {
+        super.onDetach();
+        fragmentInteractionListener = null;
+    }
+
+
+    @Override
     public void beforeTextChanged(CharSequence s, int start, int count, int after) {    }
 
 
@@ -143,6 +171,14 @@ public final class ArtistSearchFragment extends Fragment implements TextWatcher 
 
     @Override
     public void afterTextChanged(Editable s) {    }
+
+
+    @Override
+    public void onClick(View v, String artistId) {
+        if(fragmentInteractionListener != null){
+            this.fragmentInteractionListener.onArtistSelected(artistId);
+        }
+    }
 
 
     class ArtistSearchTask extends AsyncTask<String, Void, List<ArtistSearchResult>>{

@@ -17,16 +17,25 @@ import com.squareup.picasso.Picasso;
 import java.util.ArrayList;
 import java.util.List;
 
+import butterknife.OnClick;
+
 final class TrackListAdapter extends RecyclerView.Adapter<TrackListAdapter.ViewHolder> {
 
+    public interface OnClickListener{
+        void onClick(TrackItem selectedTrack, List<TrackItem> tracks);
+    }
+
+    private final OnClickListener listener;
     private final List<TrackItem> tracks;
 
-    public TrackListAdapter(){
+    public TrackListAdapter(OnClickListener listener){
         this.tracks = new ArrayList<>(10);
+        this.listener = listener;
     }
 
 
     public void swapDataSet(List<TrackItem> tracks){
+
         this.tracks.clear();
         this.tracks.addAll(tracks);
         this.notifyDataSetChanged();
@@ -47,7 +56,7 @@ final class TrackListAdapter extends RecyclerView.Adapter<TrackListAdapter.ViewH
     @Override
     public ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
         View rootView = LayoutInflater.from(parent.getContext()).inflate(R.layout.track_item, parent, false);
-        return new ViewHolder(rootView);
+        return new ViewHolder(rootView, listener);
     }
 
 
@@ -77,7 +86,7 @@ final class TrackListAdapter extends RecyclerView.Adapter<TrackListAdapter.ViewH
         public final TextView trackTitleTextView;
         public final TextView trackAlbumTextView;
 
-        public ViewHolder(View itemView) {
+        public ViewHolder(View itemView, final OnClickListener listener) {
             super(itemView);
 
             itemView.setOnClickListener(new View.OnClickListener() {
@@ -85,9 +94,7 @@ final class TrackListAdapter extends RecyclerView.Adapter<TrackListAdapter.ViewH
                 public void onClick(View v) {
                     List<TrackItem> tracks = TrackListAdapter.this.tracks;
                     TrackItem selectedTrack = tracks.get(getLayoutPosition());
-
-                    PlaybackSession.startNewSession(selectedTrack, tracks);
-                    PlaybackActivity.launch(v.getContext());
+                    listener.onClick(selectedTrack, tracks);
                 }
             });
 

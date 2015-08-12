@@ -1,6 +1,7 @@
 package com.bltucker.spotifystreamer.tracks;
 
 
+import android.app.Activity;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.app.Fragment;
@@ -27,7 +28,12 @@ import kaaes.spotify.webapi.android.models.Track;
 import kaaes.spotify.webapi.android.models.Tracks;
 
 
-public final class TrackListFragment extends Fragment {
+public final class TrackListFragment extends Fragment implements TrackListAdapter.OnClickListener {
+
+
+    public interface OnFragmentInteractionListener {
+        void onTrackSelected(TrackItem selectedTrack, List<TrackItem> tracks);
+    }
 
     private static final String TOP_TRACKS_LIST_BUNDLE_KEY = "topTracks";
     private static final String LAST_SCROLL_SCROLL_POSITION_BUNDLE_KEY = "scrollPosition";
@@ -35,6 +41,7 @@ public final class TrackListFragment extends Fragment {
     private static final String ARTIST_ID = "artistId";
 
     private TrackListAdapter trackListAdapter;
+    private OnFragmentInteractionListener fragmentInteractionListener;
 
     @InjectView(R.id.track_list_recycler_view)
     RecyclerView trackListRecycler;
@@ -49,7 +56,7 @@ public final class TrackListFragment extends Fragment {
 
 
     public TrackListFragment() {
-        this.trackListAdapter = new TrackListAdapter();
+        this.trackListAdapter = new TrackListAdapter(this);
     }
 
 
@@ -63,6 +70,18 @@ public final class TrackListFragment extends Fragment {
         }
 
         trackListAdapter.saveDataToBundle(outState, TOP_TRACKS_LIST_BUNDLE_KEY);
+    }
+
+
+    @Override
+    public void onAttach(Activity activity) {
+        super.onAttach(activity);
+        try {
+            fragmentInteractionListener = (OnFragmentInteractionListener) activity;
+        } catch (ClassCastException e) {
+            throw new ClassCastException(activity.toString()
+                    + " must implement OnFragmentInteractionListener");
+        }
     }
 
 
@@ -99,6 +118,12 @@ public final class TrackListFragment extends Fragment {
     }
 
 
+    @Override
+    public void onDetach() {
+        super.onDetach();
+        fragmentInteractionListener = null;
+    }
+
     private void getTracksInBackground(){
         if (getArguments() != null) {
             String artistId = getArguments().getString(ARTIST_ID);
@@ -106,6 +131,14 @@ public final class TrackListFragment extends Fragment {
         }
     }
 
+
+    @Override
+    public void onClick(TrackItem selectedTrack, List<TrackItem> tracks) {
+
+        if(fragmentInteractionListener != null){
+            fragmentInteractionListener.onTrackSelected(selectedTrack, tracks);
+        }
+    }
 
     class GetTrackListTask extends AsyncTask<String, Void, List<TrackItem>>{
 

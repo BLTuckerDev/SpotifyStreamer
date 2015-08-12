@@ -93,6 +93,12 @@ public class PlaybackActivity extends Activity implements PlaybackFragment.Playb
         this.playbackServiceConnection.getBoundService().pauseSong();
     }
 
+
+    @Override
+    public void onFragmentDismissed() {
+        //nothing to do.
+    }
+
     //endregion
 
 

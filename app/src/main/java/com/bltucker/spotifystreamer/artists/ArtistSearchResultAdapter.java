@@ -17,9 +17,18 @@ import java.util.List;
 
 final class ArtistSearchResultAdapter extends RecyclerView.Adapter<ArtistSearchResultAdapter.ViewHolder>{
 
+
+    private final OnClickListener listener;
+
+    public interface OnClickListener{
+        void onClick(View v, String artistId);
+    }
+
+
     private final List<ArtistSearchResult> searchResults;
 
-    public ArtistSearchResultAdapter(){
+    public ArtistSearchResultAdapter(ArtistSearchResultAdapter.OnClickListener listener){
+        this.listener = listener;
         this.searchResults = new ArrayList<>(10);
     }
 
@@ -46,7 +55,7 @@ final class ArtistSearchResultAdapter extends RecyclerView.Adapter<ArtistSearchR
     @Override
     public ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
         View rootView = LayoutInflater.from(parent.getContext()).inflate(R.layout.artist_search_result_item, parent, false);
-        return new ViewHolder(rootView);
+        return new ViewHolder(rootView, this.listener);
     }
 
 
@@ -70,14 +79,14 @@ final class ArtistSearchResultAdapter extends RecyclerView.Adapter<ArtistSearchR
         public final ImageView thumbnailImageView;
         public final TextView artistNameTextView;
 
-        public ViewHolder(View rootView){
+        public ViewHolder(View rootView, final ArtistSearchResultAdapter.OnClickListener clickListener){
             super(rootView);
 
             rootView.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
                     String artistId = ArtistSearchResultAdapter.this.searchResults.get(getLayoutPosition()).id;
-                    TrackListActivity.launch(v.getContext(), artistId);
+                    clickListener.onClick(v, artistId);
                 }
             });
 

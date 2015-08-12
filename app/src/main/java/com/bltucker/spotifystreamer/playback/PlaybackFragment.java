@@ -1,6 +1,8 @@
 package com.bltucker.spotifystreamer.playback;
 
 import android.app.Activity;
+import android.app.DialogFragment;
+import android.content.DialogInterface;
 import android.net.Uri;
 import android.os.Bundle;
 import android.app.Fragment;
@@ -25,8 +27,9 @@ import butterknife.ButterKnife;
 import butterknife.InjectView;
 import butterknife.OnClick;
 
-public class PlaybackFragment extends Fragment {
+public class PlaybackFragment extends DialogFragment {
     //TODO we need a scroll view to handle horizontal playback
+//TODO when we rotate we need to check on the state of the play button and store that!
 
     private static final String LOG_TAG = PlaybackFragment.class.getSimpleName();
 
@@ -167,11 +170,25 @@ public class PlaybackFragment extends Fragment {
     }
 
 
+    @Override
+    public void onDismiss(DialogInterface dialog) {
+        super.onDismiss(dialog);
+
+        if(fragmentListener != null){
+            this.fragmentListener.onFragmentDismissed();
+        }
+    }
+
+
+
+
+
     public interface PlaybackFragmentListener {
         void onBackButtonClick();
         void onForwardButtonClick();
         void onPlayButtonClick();
         void onPauseButtonClick();
+        void onFragmentDismissed();
     }
 
 }
