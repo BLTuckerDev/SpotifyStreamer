@@ -161,7 +161,8 @@ public final class TrackListFragment extends Fragment implements TrackListAdapte
 
                         String thumbnailUrl = track.album.images.get(track.album.images.size()-1).url;
                         String nowPlayingUrl = track.album.images.get(0).url;
-                        tracks.add(new TrackItem(thumbnailUrl, nowPlayingUrl, track.name, track.album.name, track.artists.get(0).name, track.preview_url));
+                        String externalUrl = track.external_urls.get("spotify");
+                        tracks.add(new TrackItem(thumbnailUrl, nowPlayingUrl, track.name, track.album.name, track.artists.get(0).name, track.preview_url, externalUrl));
                     }
                 }
 

@@ -11,9 +11,9 @@ public final class TrackItem implements Parcelable{
     public final String trackAlbumTitle;
     public final String previewUrl;
     public final String trackArtistName;
+    public final String externalShareUrl;
 
-
-    public TrackItem(String trackThumbnailurl, String trackNowPlayingImageUrl, String trackTitle, String trackAlbumTitle, String artistName, String previewUrl){
+    public TrackItem(String trackThumbnailurl, String trackNowPlayingImageUrl, String trackTitle, String trackAlbumTitle, String artistName, String previewUrl, String externalShareUrl){
 
         this.trackThumbnailurl = trackThumbnailurl;
         this.trackNowPlayingImageUrl = trackNowPlayingImageUrl;
@@ -21,6 +21,7 @@ public final class TrackItem implements Parcelable{
         this.trackAlbumTitle = trackAlbumTitle;
         this.trackArtistName = artistName;
         this.previewUrl = previewUrl;
+        this.externalShareUrl = externalShareUrl;
     }
 
     private TrackItem(Parcel parcel){
@@ -30,6 +31,7 @@ public final class TrackItem implements Parcelable{
         this.trackAlbumTitle = parcel.readString();
         this.trackArtistName = parcel.readString();
         this.previewUrl = parcel.readString();
+        this.externalShareUrl = parcel.readString();
     }
 
 
@@ -47,6 +49,7 @@ public final class TrackItem implements Parcelable{
         dest.writeString(this.trackAlbumTitle);
         dest.writeString(this.trackArtistName);
         dest.writeString(this.previewUrl);
+        dest.writeString(this.externalShareUrl);
     }
 
     public static final Parcelable.Creator<TrackItem> CREATOR = new Parcelable.Creator<TrackItem>() {
