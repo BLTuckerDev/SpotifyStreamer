@@ -5,6 +5,8 @@ import android.content.Context;
 import android.content.ServiceConnection;
 import android.os.IBinder;
 
+import com.bltucker.spotifystreamer.EventBus;
+
 public final class PlaybackServiceConnection implements ServiceConnection {
 
     private PlaybackService boundService;
@@ -15,6 +17,7 @@ public final class PlaybackServiceConnection implements ServiceConnection {
     public void onServiceConnected(ComponentName name, IBinder service) {
         this.boundService = ((PlaybackService.PlaybackServiceBinder) service).getService();
         this.isBound = true;
+        EventBus.getEventBus().fireEvent(new PlaybackServiceConnectedEvent());
     }
 
 

@@ -86,17 +86,22 @@ public class PlaybackFragment extends DialogFragment {
 
         playbackProgressBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
             @Override
-            public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {  }
+            public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
+                if(fromUser){
+                    currentPlaybackTimeTextView.setText(PlaybackFragment.this.getFormattedPlaybackTimeFromMilliseconds(seekBar.getProgress()));
+                }
+            }
 
 
             @Override
-            public void onStartTrackingTouch(SeekBar seekBar) {            }
+            public void onStartTrackingTouch(SeekBar seekBar) {
+            }
 
 
             @Override
             public void onStopTrackingTouch(SeekBar seekBar) {
 
-                if(playbackServiceConnectionIsReady()){
+                if (playbackServiceConnectionIsReady()) {
                     playbackServiceConnection.getBoundService().seekTo(seekBar.getProgress());
                 }
             }
@@ -109,7 +114,8 @@ public class PlaybackFragment extends DialogFragment {
     @Override
     public void onActivityCreated(Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
-        this.updateFragmentUI(PlaybackSession.getCurrentSession().getCurrentTrack());
+        TrackItem currentTrack = PlaybackSession.getCurrentSession().getCurrentTrack();
+        this.updateFragmentUI(currentTrack);
     }
 
 
@@ -187,6 +193,8 @@ public class PlaybackFragment extends DialogFragment {
         return this.playbackServiceConnection != null && this.playbackServiceConnection.isActive();
     }
 
+
+
     private void playTrack(TrackItem track){
         try {
 
@@ -197,6 +205,13 @@ public class PlaybackFragment extends DialogFragment {
         } catch (IOException e) {
             Log.e(LOG_TAG, Log.getStackTraceString(e));
         }
+    }
+
+    @Subscribe
+    public void onPlaybackServiceConnected(PlaybackServiceConnectedEvent event){
+        this.playTrack(PlaybackSession.getCurrentSession().getCurrentTrack());
+        this.pauseButton.setVisibility(View.VISIBLE);
+        this.playButton.setVisibility(View.INVISIBLE);
     }
 
     @Subscribe
@@ -214,10 +229,15 @@ public class PlaybackFragment extends DialogFragment {
     @Subscribe
     public void onPlaybackStatusUpdateEvent(PlaybackStatusUpdateEvent event){
         playbackProgressBar.setProgress(event.getCurrentTrackPosition());
-        String currentPlaybackTime = String.format("0:%02d", event.getCurrentTrackPosition() / 1000);
+        String currentPlaybackTime = this.getFormattedPlaybackTimeFromMilliseconds(event.getCurrentTrackPosition());
         currentPlaybackTimeTextView.setText(currentPlaybackTime);
     }
 
+
+    private String getFormattedPlaybackTimeFromMilliseconds(int milliseconds){
+        String currentPlaybackTime = String.format("0:%02d", milliseconds / 1000);
+        return currentPlaybackTime;
+    }
 
     private void updateFragmentUI(TrackItem currentTrack){
         playbackProgressBar.setProgress(0);

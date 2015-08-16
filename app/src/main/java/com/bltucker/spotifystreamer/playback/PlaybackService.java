@@ -39,6 +39,7 @@ public class PlaybackService extends Service implements MediaPlayer.OnPreparedLi
 
     private MediaPlayer mediaPlayer;
     private boolean isPaused = false;
+    private boolean canSeek = false;
 
     private final Handler playbackTimeHandler = new Handler();
 
@@ -96,7 +97,7 @@ public class PlaybackService extends Service implements MediaPlayer.OnPreparedLi
 
     public void seekTo(int progress) {
 
-        if(this.mediaPlayer.isPlaying()){
+        if(this.canSeek){
             this.mediaPlayer.seekTo(progress);
         }
 
@@ -114,6 +115,7 @@ public class PlaybackService extends Service implements MediaPlayer.OnPreparedLi
     public void onCompletion(MediaPlayer mp) {
         TrackItem nextTrack = PlaybackSession.getCurrentSession().advanceToNextTrack();
         try {
+            this.canSeek = false;
             this.playSong(Uri.parse(nextTrack.previewUrl));
         } catch (IOException e) {
             Log.e(LOG_TAG, Log.getStackTraceString(e));
@@ -133,6 +135,7 @@ public class PlaybackService extends Service implements MediaPlayer.OnPreparedLi
     @Override
     public void onPrepared(MediaPlayer mp) {
         mp.start();
+        this.canSeek = true;
         this.startPlaybackUpdates(mp);
     }
 
