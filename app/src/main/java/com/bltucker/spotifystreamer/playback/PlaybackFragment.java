@@ -209,9 +209,11 @@ public class PlaybackFragment extends DialogFragment {
 
     @Subscribe
     public void onPlaybackServiceConnected(PlaybackServiceConnectedEvent event){
-        this.playTrack(PlaybackSession.getCurrentSession().getCurrentTrack());
-        this.pauseButton.setVisibility(View.VISIBLE);
-        this.playButton.setVisibility(View.INVISIBLE);
+        if(!this.playbackServiceConnection.getBoundService().isPlaying()){
+            this.playTrack(PlaybackSession.getCurrentSession().getCurrentTrack());
+            this.pauseButton.setVisibility(View.VISIBLE);
+            this.playButton.setVisibility(View.INVISIBLE);
+        }
     }
 
     @Subscribe
