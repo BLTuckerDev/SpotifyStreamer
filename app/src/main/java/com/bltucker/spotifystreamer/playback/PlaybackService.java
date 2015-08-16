@@ -23,6 +23,7 @@ public class PlaybackService extends Service implements MediaPlayer.OnPreparedLi
 
     private static final String LOG_TAG = PlaybackService.class.getSimpleName();
 
+
     public class PlaybackServiceBinder extends Binder {
 
         public PlaybackService getService(){
@@ -91,6 +92,14 @@ public class PlaybackService extends Service implements MediaPlayer.OnPreparedLi
     public void stopSong(){
         this.isPaused = false;
         this.mediaPlayer.stop();
+    }
+
+    public void seekTo(int progress) {
+
+        if(this.mediaPlayer.isPlaying()){
+            this.mediaPlayer.seekTo(progress);
+        }
+
     }
 
     public boolean isPaused(){

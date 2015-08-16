@@ -12,6 +12,7 @@ import android.view.ViewGroup;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.ProgressBar;
+import android.widget.SeekBar;
 import android.widget.TextView;
 
 import com.bltucker.spotifystreamer.EventBus;
@@ -48,7 +49,7 @@ public class PlaybackFragment extends DialogFragment {
     ImageButton pauseButton;
 
     @InjectView(R.id.playback_progress_bar)
-    ProgressBar playbackProgressBar;
+    SeekBar playbackProgressBar;
 
     @InjectView(R.id.playback_current_time)
     TextView currentPlaybackTimeTextView;
@@ -82,6 +83,24 @@ public class PlaybackFragment extends DialogFragment {
         // Inflate the layout for this fragment
         View view = inflater.inflate(R.layout.fragment_playback, container, false);
         ButterKnife.inject(this, view);
+
+        playbackProgressBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
+            @Override
+            public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {  }
+
+
+            @Override
+            public void onStartTrackingTouch(SeekBar seekBar) {            }
+
+
+            @Override
+            public void onStopTrackingTouch(SeekBar seekBar) {
+
+                if(playbackServiceConnectionIsReady()){
+                    playbackServiceConnection.getBoundService().seekTo(seekBar.getProgress());
+                }
+            }
+        });
 
         return view;
     }
