@@ -40,6 +40,7 @@ public class PlaybackService extends Service implements MediaPlayer.OnPreparedLi
     private MediaPlayer mediaPlayer;
     private boolean isPaused = false;
     private boolean canSeek = false;
+    private Uri currentlyPlayingUri;
 
     private final Handler playbackTimeHandler = new Handler();
 
@@ -72,6 +73,7 @@ public class PlaybackService extends Service implements MediaPlayer.OnPreparedLi
     public void playSong(Uri songUri) throws IOException {
         this.mediaPlayer.reset();
         this.isPaused = false;
+        this.currentlyPlayingUri = songUri;
         this.mediaPlayer.setDataSource(getApplicationContext(), songUri);
         this.mediaPlayer.prepareAsync();
     }
@@ -109,6 +111,16 @@ public class PlaybackService extends Service implements MediaPlayer.OnPreparedLi
 
     public boolean isPlaying(){
         return this.mediaPlayer.isPlaying();
+    }
+
+
+    public Uri getCurrentlyPlayingUri() {
+        return currentlyPlayingUri;
+    }
+
+
+    public int getCurrentPlaybackPosition(){
+        return this.mediaPlayer.getCurrentPosition();
     }
 
     @Override

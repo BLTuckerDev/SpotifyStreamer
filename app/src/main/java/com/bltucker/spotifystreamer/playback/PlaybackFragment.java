@@ -228,15 +228,49 @@ public class PlaybackFragment extends DialogFragment {
 
     @Subscribe
     public void onPlaybackServiceConnected(PlaybackServiceConnectedEvent event){
-        if(!this.playbackServiceConnection.getBoundService().isPlaying()){
-            this.playTrack(PlaybackSession.getCurrentSession().getCurrentTrack());
+        TrackItem currentTrack = PlaybackSession.getCurrentSession().getCurrentTrack();
+
+        boolean playing = this.playbackServiceConnection.getBoundService().isPlaying();
+        boolean paused = this.playbackServiceConnection.getBoundService().isPaused();
+
+        if(!playing && !paused){
+                //start fresh
+            this.playTrack(currentTrack);
+
             this.pauseButton.setVisibility(View.VISIBLE);
             this.playButton.setVisibility(View.INVISIBLE);
-        } else {
-            Log.d(LOG_TAG, "Already playing a song!");
+
+        } else if(playing && !paused) {
+            //currently playing a song
+            Uri currentlyPlayingUri = this.playbackServiceConnection.getBoundService().getCurrentlyPlayingUri();
+            if(!currentlyPlayingUri.equals(Uri.parse(currentTrack.previewUrl))){
+                this.playTrack(currentTrack);
+            }
+
             this.pauseButton.setVisibility(View.VISIBLE);
             this.playButton.setVisibility(View.INVISIBLE);
+
+        } else if(!playing && paused){
+
+            //song is currently paused
+            Uri currentlyPlayingUri = this.playbackServiceConnection.getBoundService().getCurrentlyPlayingUri();
+
+            if(!currentlyPlayingUri.equals(Uri.parse(currentTrack.previewUrl))){
+                this.playTrack(currentTrack);
+                this.pauseButton.setVisibility(View.VISIBLE);
+                this.playButton.setVisibility(View.INVISIBLE);
+            } else {
+                this.pauseButton.setVisibility(View.INVISIBLE);
+                this.playButton.setVisibility(View.VISIBLE);
+                int currentPlaybackPosition = this.playbackServiceConnection.getBoundService().getCurrentPlaybackPosition();
+                playbackProgressBar.setProgress(currentPlaybackPosition);
+                String currentPlaybackTime = this.getFormattedPlaybackTimeFromMilliseconds(currentPlaybackPosition);
+                currentPlaybackTimeTextView.setText(currentPlaybackTime);
+            }
+
         }
+
+
     }
 
     @Subscribe
