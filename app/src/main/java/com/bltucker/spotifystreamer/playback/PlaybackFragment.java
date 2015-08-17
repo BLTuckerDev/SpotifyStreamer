@@ -232,6 +232,10 @@ public class PlaybackFragment extends DialogFragment {
             this.playTrack(PlaybackSession.getCurrentSession().getCurrentTrack());
             this.pauseButton.setVisibility(View.VISIBLE);
             this.playButton.setVisibility(View.INVISIBLE);
+        } else {
+            Log.d(LOG_TAG, "Already playing a song!");
+            this.pauseButton.setVisibility(View.VISIBLE);
+            this.playButton.setVisibility(View.INVISIBLE);
         }
     }
 
