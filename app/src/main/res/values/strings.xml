@@ -9,4 +9,9 @@
     <string name="title_activity_track_list">TrackListActivity</string>
     <string name="title_activity_playback">PlaybackActivity</string>
     <string name="media_player_error">There was an error streaming the current song. Please make sure you have an active wireless connection.</string>
+    <string name="preference_country_code_key">country_preference_key</string>
+    <string name="preference_show_notification_controls_key">notification_control_preference_key</string>
+    <string name="country_code_preference_title">Country Code</string>
+    <string name="preference_default_country_code">US</string>
+    <string name="preference_show_notification_controls_title">Show playback control notifications</string>
 </resources>

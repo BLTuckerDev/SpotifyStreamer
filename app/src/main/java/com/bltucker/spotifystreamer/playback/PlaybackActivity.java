@@ -4,8 +4,11 @@ import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
+import android.view.Menu;
+import android.view.MenuItem;
 
 import com.bltucker.spotifystreamer.R;
+import com.bltucker.spotifystreamer.SettingsActivity;
 
 public class PlaybackActivity extends Activity implements PlaybackServiceConnectionProvider {
 
@@ -47,6 +50,29 @@ public class PlaybackActivity extends Activity implements PlaybackServiceConnect
     }
 
     //endregion
+
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        super.onCreateOptionsMenu(menu);
+
+        getMenuInflater().inflate(R.menu.menu_main, menu);
+
+        return true;
+    }
+
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        int id = item.getItemId();
+
+        if(id == R.id.action_settings){
+            SettingsActivity.launch(this);
+            return true;
+        }
+
+        return super.onOptionsItemSelected(item);
+    }
 
     @Override
     public PlaybackServiceConnection getPlaybackServiceConnection() {

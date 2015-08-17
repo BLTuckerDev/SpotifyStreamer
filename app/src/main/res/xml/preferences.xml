@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android"
+                  android:layout_width="match_parent"
+                  android:layout_height="match_parent"    >
+
+    <EditTextPreference
+        android:title="@string/country_code_preference_title"
+        android:key="@string/preference_country_code_key"
+        android:defaultValue="@string/preference_default_country_code"
+        android:inputType="textNoSuggestions"
+        android:singleLine="true"  />
+
+    <CheckBoxPreference
+        android:title="@string/preference_show_notification_controls_title"
+        android:key="@string/preference_show_notification_controls_key"
+        android:defaultValue="true" />
+</PreferenceScreen>

@@ -4,8 +4,11 @@ import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
+import android.view.Menu;
+import android.view.MenuItem;
 
 import com.bltucker.spotifystreamer.R;
+import com.bltucker.spotifystreamer.SettingsActivity;
 import com.bltucker.spotifystreamer.playback.PlaybackActivity;
 import com.bltucker.spotifystreamer.playback.PlaybackSession;
 
@@ -44,5 +47,28 @@ public class TrackListActivity extends Activity implements TrackListFragment.OnF
     public void onTrackSelected(TrackItem selectedTrack, List<TrackItem> tracks) {
         PlaybackSession.startNewSession(selectedTrack, tracks);
         PlaybackActivity.launch(this);
+    }
+
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        super.onCreateOptionsMenu(menu);
+
+        getMenuInflater().inflate(R.menu.menu_main, menu);
+
+        return true;
+    }
+
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        int id = item.getItemId();
+
+        if(id == R.id.action_settings){
+            SettingsActivity.launch(this);
+            return true;
+        }
+
+        return super.onOptionsItemSelected(item);
     }
 }
