@@ -2,9 +2,12 @@ package com.bltucker.spotifystreamer.tracks;
 
 
 import android.app.Activity;
+import android.content.Context;
+import android.content.SharedPreferences;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.app.Fragment;
+import android.preference.PreferenceManager;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
@@ -150,7 +153,18 @@ public final class TrackListFragment extends Fragment implements TrackListAdapte
                 SpotifyService spotifyService = api.getService();
 
                 Map<String, Object> queryMap = new HashMap<>();
-                queryMap.put("country", "US");
+                Context context = TrackListFragment.this.getActivity();
+
+                if(context != null){
+
+                    String countryCodePreference = PreferenceManager.getDefaultSharedPreferences(context)
+                            .getString(context.getString(R.string.preference_country_code_key), "US");
+
+                    queryMap.put("country", countryCodePreference);
+                } else {
+                    queryMap.put("country", "US");
+                }
+
                 Tracks artistTopTracks = spotifyService.getArtistTopTrack(params[0], queryMap);
 
                 List<TrackItem> tracks = new ArrayList<>(artistTopTracks.tracks.size());
