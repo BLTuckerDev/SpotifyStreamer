@@ -10,13 +10,21 @@ import android.view.MenuItem;
 import com.bltucker.spotifystreamer.R;
 import com.bltucker.spotifystreamer.SettingsActivity;
 import com.bltucker.spotifystreamer.playback.PlaybackActivity;
+import com.bltucker.spotifystreamer.playback.PlaybackService;
+import com.bltucker.spotifystreamer.playback.PlaybackServiceConnectedEvent;
+import com.bltucker.spotifystreamer.playback.PlaybackServiceConnection;
 import com.bltucker.spotifystreamer.playback.PlaybackSession;
+import com.squareup.otto.Subscribe;
 
 import java.util.List;
 
 public class TrackListActivity extends Activity implements TrackListFragment.OnFragmentInteractionListener {
 
     private static final String ARTIST_ID_INTENT_KEY = "artistId";
+
+    private MenuItem nowPlayingMenuItem;
+
+    private PlaybackServiceConnection playbackServiceConnection = new PlaybackServiceConnection();
 
     public static void launch(Context context, String artistId){
 
@@ -42,6 +50,27 @@ public class TrackListActivity extends Activity implements TrackListFragment.OnF
 
     }
 
+    @Override
+    protected void onStart() {
+        super.onStart();
+
+        Intent playbackServiceIntent = new Intent(this, PlaybackService.class);
+        bindService(playbackServiceIntent, playbackServiceConnection, Context.BIND_AUTO_CREATE);
+        startService(playbackServiceIntent);
+    }
+
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        this.setNowPlayingMenuItemVisibility();
+    }
+
+    @Override
+    protected void onDestroy() {
+        this.playbackServiceConnection.unbind(this);
+        super.onDestroy();
+    }
 
     @Override
     public void onTrackSelected(TrackItem selectedTrack, List<TrackItem> tracks) {
@@ -55,6 +84,7 @@ public class TrackListActivity extends Activity implements TrackListFragment.OnF
         super.onCreateOptionsMenu(menu);
 
         getMenuInflater().inflate(R.menu.menu_main, menu);
+        nowPlayingMenuItem = menu.findItem(R.id.action_now_playing);
 
         return true;
     }
@@ -69,6 +99,24 @@ public class TrackListActivity extends Activity implements TrackListFragment.OnF
             return true;
         }
 
+        if(id == R.id.action_now_playing){
+            PlaybackActivity.launch(this);
+            return true;
+        }
+
         return super.onOptionsItemSelected(item);
+    }
+
+
+    @Subscribe
+    public void onPlaybackServiceConnected(PlaybackServiceConnectedEvent event){
+        this.setNowPlayingMenuItemVisibility();
+    }
+
+
+    private void setNowPlayingMenuItemVisibility(){
+        if(this.playbackServiceConnection.isActive() && this.playbackServiceConnection.getBoundService().isPlaying()){
+            nowPlayingMenuItem.setVisible(true);
+        }
     }
 }

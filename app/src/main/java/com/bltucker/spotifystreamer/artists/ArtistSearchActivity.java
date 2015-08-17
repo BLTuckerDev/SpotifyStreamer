@@ -12,12 +12,14 @@ import com.bltucker.spotifystreamer.SettingsActivity;
 import com.bltucker.spotifystreamer.playback.PlaybackActivity;
 import com.bltucker.spotifystreamer.playback.PlaybackFragment;
 import com.bltucker.spotifystreamer.playback.PlaybackService;
+import com.bltucker.spotifystreamer.playback.PlaybackServiceConnectedEvent;
 import com.bltucker.spotifystreamer.playback.PlaybackServiceConnection;
 import com.bltucker.spotifystreamer.playback.PlaybackServiceConnectionProvider;
 import com.bltucker.spotifystreamer.playback.PlaybackSession;
 import com.bltucker.spotifystreamer.tracks.TrackItem;
 import com.bltucker.spotifystreamer.tracks.TrackListActivity;
 import com.bltucker.spotifystreamer.tracks.TrackListFragment;
+import com.squareup.otto.Subscribe;
 
 import java.util.List;
 
@@ -26,6 +28,7 @@ public class ArtistSearchActivity extends Activity implements ArtistSearchFragme
         TrackListFragment.OnFragmentInteractionListener, PlaybackServiceConnectionProvider {
 
     private boolean twoPaneMode = false;
+    private MenuItem nowPlayingMenuItem;
 
     private PlaybackServiceConnection playbackServiceConnection = new PlaybackServiceConnection();
 
@@ -50,6 +53,13 @@ public class ArtistSearchActivity extends Activity implements ArtistSearchFragme
 
 
     @Override
+    protected void onResume() {
+        super.onResume();
+        this.setNowPlayingMenuItemVisibility();
+    }
+
+
+    @Override
     protected void onDestroy() {
         this.playbackServiceConnection.unbind(this);
         super.onDestroy();
@@ -61,6 +71,7 @@ public class ArtistSearchActivity extends Activity implements ArtistSearchFragme
         super.onCreateOptionsMenu(menu);
 
         getMenuInflater().inflate(R.menu.menu_main, menu);
+        nowPlayingMenuItem = menu.findItem(R.id.action_now_playing);
 
         return true;
     }
@@ -72,6 +83,11 @@ public class ArtistSearchActivity extends Activity implements ArtistSearchFragme
 
         if(id == R.id.action_settings){
             SettingsActivity.launch(this);
+            return true;
+        }
+
+        if(id == R.id.action_now_playing){
+            PlaybackActivity.launch(this);
             return true;
         }
 
@@ -105,6 +121,17 @@ public class ArtistSearchActivity extends Activity implements ArtistSearchFragme
 
     }
 
+    @Subscribe
+    public void onPlaybackServiceConnected(PlaybackServiceConnectedEvent event){
+        this.setNowPlayingMenuItemVisibility();
+    }
+
+
+    private void setNowPlayingMenuItemVisibility(){
+        if(this.playbackServiceConnection.isActive() && !twoPaneMode && this.playbackServiceConnection.getBoundService().isPlaying()){
+            nowPlayingMenuItem.setVisible(true);
+        }
+    }
 
     @Override
     public PlaybackServiceConnection getPlaybackServiceConnection() {
