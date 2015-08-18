@@ -70,6 +70,8 @@ public class PlaybackService extends Service implements MediaPlayer.OnPreparedLi
 
     private final Handler playbackTimeHandler = new Handler();
 
+    private NotificationManager notificationManager;
+
     public PlaybackService() {    }
 
     @Override
@@ -85,6 +87,7 @@ public class PlaybackService extends Service implements MediaPlayer.OnPreparedLi
         this.mediaPlayer.setOnCompletionListener(this);
         this.mediaPlayer.setOnErrorListener(this);
 
+        notificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
     }
 
 
@@ -179,6 +182,7 @@ public class PlaybackService extends Service implements MediaPlayer.OnPreparedLi
     public void stopSong(){
         this.isPaused = false;
         this.mediaPlayer.stop();
+        notificationManager.cancelAll();
     }
 
     public void seekTo(int progress) {
@@ -224,6 +228,7 @@ public class PlaybackService extends Service implements MediaPlayer.OnPreparedLi
 
         Toast.makeText(this, getString(R.string.media_player_error), Toast.LENGTH_LONG).show();
         mp.reset();
+        notificationManager.cancelAll();
         return true;
     }
 
@@ -268,7 +273,7 @@ public class PlaybackService extends Service implements MediaPlayer.OnPreparedLi
                     return null;
                 }
 
-                NotificationManager notificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
+
                 PlaybackSession currentSession = PlaybackSession.getCurrentSession();
                 TrackItem currentTrack = currentSession.getCurrentTrack();
 
