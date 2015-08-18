@@ -1,21 +1,37 @@
 package com.bltucker.spotifystreamer.playback;
 
+import android.app.Notification;
+import android.app.NotificationManager;
+import android.app.PendingIntent;
 import android.app.Service;
+import android.content.BroadcastReceiver;
+import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
+import android.content.SharedPreferences;
+import android.graphics.Bitmap;
+import android.graphics.drawable.Drawable;
 import android.media.AudioManager;
 import android.media.MediaPlayer;
+import android.media.session.MediaController;
+import android.media.session.MediaSession;
 import android.net.Uri;
+import android.os.AsyncTask;
 import android.os.Binder;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.PowerManager;
+import android.preference.PreferenceManager;
 import android.util.Log;
+import android.widget.RemoteViews;
 import android.widget.Toast;
 
 
 import com.bltucker.spotifystreamer.EventBus;
 import com.bltucker.spotifystreamer.R;
 import com.bltucker.spotifystreamer.tracks.TrackItem;
+import com.squareup.picasso.Picasso;
+import com.squareup.picasso.Target;
 
 import java.io.IOException;
 
@@ -23,6 +39,16 @@ public class PlaybackService extends Service implements MediaPlayer.OnPreparedLi
 
     private static final String LOG_TAG = PlaybackService.class.getSimpleName();
 
+    protected static final String MEDIA_SESSION_NAME = "mediaSession";
+
+    protected static final String PLAY_INTENT = "dev.bltucker.spotifystreamer.notification.play";
+    protected static final String PAUSE_INTENT = "dev.bltucker.spotifystreamer.notification.pause";
+    protected static final String NEXT_INTENT = "dev.bltucker.spotifystreamer.notification.next";
+    protected static final String PREVIOUS_INTENT = "dev.bltucker.spotifystreamer.notification.previous";
+
+    protected static final int PENDING_INTENTS_REQUEST_CODE = 1;
+
+    protected static final int PLAYBACK_CONTROLS_NOTIFICATION_ID = 1;
 
     public class PlaybackServiceBinder extends Binder {
 
@@ -46,7 +72,6 @@ public class PlaybackService extends Service implements MediaPlayer.OnPreparedLi
 
     public PlaybackService() {    }
 
-
     @Override
     public void onCreate() {
         super.onCreate();
@@ -64,11 +89,70 @@ public class PlaybackService extends Service implements MediaPlayer.OnPreparedLi
 
 
     @Override
+    public int onStartCommand(Intent intent, int flags, int startId) {
+
+        this.handlePotentialNotificationIntent(intent);
+
+        return super.onStartCommand(intent, flags, startId);
+    }
+
+    private void handlePotentialNotificationIntent(Intent intent){
+
+        if(null == intent){
+            return;
+        }
+
+        String intentAction = intent.getAction();
+
+        if(null == intentAction){
+            return;
+        }
+
+
+        if(intentAction.equals(PLAY_INTENT)){
+
+            this.resumeSong();
+
+        } else if(intentAction.equals(PAUSE_INTENT)){
+
+            this.pauseSong();
+
+        } else if(intentAction.equals(NEXT_INTENT)){
+
+            TrackItem trackItem = PlaybackSession.getCurrentSession().advanceToNextTrack();
+            try {
+                this.playSong(Uri.parse(trackItem.previewUrl));
+            } catch (IOException e) {
+                Log.e(LOG_TAG, Log.getStackTraceString(e));
+            }
+
+        } else if(intentAction.equals(PREVIOUS_INTENT)){
+
+            TrackItem trackItem = PlaybackSession.getCurrentSession().returnToPreviousTrack();
+            try {
+                this.playSong(Uri.parse(trackItem.previewUrl));
+            } catch (IOException e) {
+                Log.e(LOG_TAG, Log.getStackTraceString(e));
+            }
+        }
+
+
+    }
+
+    @Override
+    public void onDestroy() {
+        this.mediaPlayer.release();
+        super.onDestroy();
+    }
+
+
+    @Override
     public IBinder onBind(Intent intent) {
         return this.serviceBinder;
     }
 
-    //TODO do we need to dispose in onUnbind?
+
+
 
     public void playSong(Uri songUri) throws IOException {
         this.mediaPlayer.reset();
@@ -149,6 +233,7 @@ public class PlaybackService extends Service implements MediaPlayer.OnPreparedLi
         mp.start();
         this.canSeek = true;
         this.startPlaybackUpdates(mp);
+        this.setupNotificationControls();
     }
 
 
@@ -158,7 +243,7 @@ public class PlaybackService extends Service implements MediaPlayer.OnPreparedLi
             @Override
             public void run() {
 
-                if(mediaPlayer.isPlaying()){
+                if (mediaPlayer.isPlaying()) {
                     //update the time and post again
                     EventBus.getEventBus().fireEvent(new PlaybackStatusUpdateEvent(mediaPlayer.getCurrentPosition()));
                     playbackTimeHandler.postDelayed(this, 500);
@@ -167,4 +252,55 @@ public class PlaybackService extends Service implements MediaPlayer.OnPreparedLi
         }, 500);
 
     }
+
+
+    private void setupNotificationControls(){
+
+        SharedPreferences defaultSharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
+
+        if(!defaultSharedPreferences.getBoolean(getString(R.string.preference_show_notification_controls_key), true)){
+            return;
+        }
+
+        NotificationManager notificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
+        PlaybackSession currentSession = PlaybackSession.getCurrentSession();
+        TrackItem currentTrack = currentSession.getCurrentTrack();
+
+        Intent blankIntent = new Intent(this, PlaybackService.class);
+        PendingIntent contentIntent = PendingIntent.getService(this, PENDING_INTENTS_REQUEST_CODE, blankIntent, 0);
+
+
+        Notification.Builder builder = new Notification.Builder(this)
+                        .setContentTitle(currentTrack.trackAlbumTitle)
+                        .setContentText(currentTrack.trackTitle)
+                        .setContentIntent(contentIntent)
+                        .setStyle(new Notification.MediaStyle())
+                        .setOngoing(true);
+
+
+
+        Intent playIntent = new Intent(this, PlaybackService.class);
+        playIntent.setAction(PLAY_INTENT);
+        Intent pauseIntent = new Intent(this, PlaybackService.class);
+        pauseIntent.setAction(PAUSE_INTENT);
+        Intent nextIntent = new Intent(this, PlaybackService.class);
+        nextIntent.setAction(NEXT_INTENT);
+        Intent previousIntent = new Intent(this, PlaybackService.class);
+        previousIntent.setAction(PREVIOUS_INTENT);
+
+
+        PendingIntent pendingPreviousIntent = PendingIntent.getService(this, PENDING_INTENTS_REQUEST_CODE, previousIntent, PendingIntent.FLAG_UPDATE_CURRENT);
+        PendingIntent pendingPlayingIntent = PendingIntent.getService(this, PENDING_INTENTS_REQUEST_CODE, playIntent, PendingIntent.FLAG_UPDATE_CURRENT);
+        PendingIntent pausePendingIntent = PendingIntent.getService(this, PENDING_INTENTS_REQUEST_CODE, pauseIntent, PendingIntent.FLAG_UPDATE_CURRENT);
+        PendingIntent pendingNextIntent = PendingIntent.getService(this, PENDING_INTENTS_REQUEST_CODE, nextIntent, PendingIntent.FLAG_UPDATE_CURRENT);
+
+        builder.addAction(new Notification.Action(android.R.drawable.ic_media_previous, "Previous", pendingPreviousIntent));
+        builder.addAction(new Notification.Action(android.R.drawable.ic_media_play, "Play", pendingPlayingIntent));
+        builder.addAction(new Notification.Action(android.R.drawable.ic_media_pause, "Pause", pausePendingIntent));
+        builder.addAction(new Notification.Action(android.R.drawable.ic_media_next, "Next", pendingNextIntent));
+
+        notificationManager.notify(PlaybackService.PLAYBACK_CONTROLS_NOTIFICATION_ID, builder.build());
+
+    }
+
 }
