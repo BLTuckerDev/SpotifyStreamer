@@ -105,7 +105,7 @@ public class PlaybackFragment extends DialogFragment {
         playbackProgressBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
             @Override
             public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
-                if(fromUser){
+                if (fromUser) {
                     currentPlaybackTimeTextView.setText(PlaybackFragment.this.getFormattedPlaybackTimeFromMilliseconds(seekBar.getProgress()));
                 }
             }
@@ -203,6 +203,11 @@ public class PlaybackFragment extends DialogFragment {
         super.onDetach();
         EventBus.getEventBus().unregister(this);
         fragmentListener = null;
+
+        if(this.playbackServiceConnection.isActive() && this.playbackServiceConnection.getBoundService().isPaused()){
+            this.playbackServiceConnection.getBoundService().dismissNotifications();
+        }
+
         playbackServiceConnection = null;
     }
 

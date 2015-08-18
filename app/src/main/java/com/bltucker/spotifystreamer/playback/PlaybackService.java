@@ -176,6 +176,7 @@ public class PlaybackService extends Service implements MediaPlayer.OnPreparedLi
         this.mediaPlayer.start();
         this.startPlaybackUpdates(this.mediaPlayer);
         this.isPaused = false;
+        this.setupNotificationControls();
     }
 
 
@@ -191,6 +192,10 @@ public class PlaybackService extends Service implements MediaPlayer.OnPreparedLi
             this.mediaPlayer.seekTo(progress);
         }
 
+    }
+
+    public void dismissNotifications(){
+        this.notificationManager.cancelAll();
     }
 
     public boolean isPaused(){
