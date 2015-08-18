@@ -256,50 +256,69 @@ public class PlaybackService extends Service implements MediaPlayer.OnPreparedLi
 
     private void setupNotificationControls(){
 
-        SharedPreferences defaultSharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
+        final PlaybackService that = this;
 
-        if(!defaultSharedPreferences.getBoolean(getString(R.string.preference_show_notification_controls_key), true)){
-            return;
-        }
+        new AsyncTask<Void, Void, Void>() {
+            @Override
+            protected Void doInBackground(Void... params) {
 
-        NotificationManager notificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
-        PlaybackSession currentSession = PlaybackSession.getCurrentSession();
-        TrackItem currentTrack = currentSession.getCurrentTrack();
+                SharedPreferences defaultSharedPreferences = PreferenceManager.getDefaultSharedPreferences(that);
 
-        Intent blankIntent = new Intent(this, PlaybackService.class);
-        PendingIntent contentIntent = PendingIntent.getService(this, PENDING_INTENTS_REQUEST_CODE, blankIntent, 0);
+                if(!defaultSharedPreferences.getBoolean(getString(R.string.preference_show_notification_controls_key), true)){
+                    return null;
+                }
 
+                NotificationManager notificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
+                PlaybackSession currentSession = PlaybackSession.getCurrentSession();
+                TrackItem currentTrack = currentSession.getCurrentTrack();
 
-        Notification.Builder builder = new Notification.Builder(this)
-                        .setContentTitle(currentTrack.trackAlbumTitle)
-                        .setContentText(currentTrack.trackTitle)
-                        .setContentIntent(contentIntent)
-                        .setStyle(new Notification.MediaStyle())
-                        .setOngoing(true);
+                Intent blankIntent = new Intent(that, PlaybackService.class);
+                PendingIntent contentIntent = PendingIntent.getService(that, PENDING_INTENTS_REQUEST_CODE, blankIntent, 0);
 
 
+                Notification.Builder builder = null;
+                try {
+                    builder = new Notification.Builder(that)
+                            .setSmallIcon(R.mipmap.ic_launcher)
+                            .setContentTitle(currentTrack.trackAlbumTitle)
+                            .setContentText(currentTrack.trackTitle)
+                            .setContentIntent(contentIntent)
+                            .setLargeIcon(Picasso.with(that).load(currentTrack.trackThumbnailurl).get())
+                            .setStyle(new Notification.MediaStyle())
+                            .setOngoing(true);
+                } catch (IOException e) {
+                    e.printStackTrace();
+                    return null;
+                }
 
-        Intent playIntent = new Intent(this, PlaybackService.class);
-        playIntent.setAction(PLAY_INTENT);
-        Intent pauseIntent = new Intent(this, PlaybackService.class);
-        pauseIntent.setAction(PAUSE_INTENT);
-        Intent nextIntent = new Intent(this, PlaybackService.class);
-        nextIntent.setAction(NEXT_INTENT);
-        Intent previousIntent = new Intent(this, PlaybackService.class);
-        previousIntent.setAction(PREVIOUS_INTENT);
+
+                Intent playIntent = new Intent(that, PlaybackService.class);
+                playIntent.setAction(PLAY_INTENT);
+                Intent pauseIntent = new Intent(that, PlaybackService.class);
+                pauseIntent.setAction(PAUSE_INTENT);
+                Intent nextIntent = new Intent(that, PlaybackService.class);
+                nextIntent.setAction(NEXT_INTENT);
+                Intent previousIntent = new Intent(that, PlaybackService.class);
+                previousIntent.setAction(PREVIOUS_INTENT);
 
 
-        PendingIntent pendingPreviousIntent = PendingIntent.getService(this, PENDING_INTENTS_REQUEST_CODE, previousIntent, PendingIntent.FLAG_UPDATE_CURRENT);
-        PendingIntent pendingPlayingIntent = PendingIntent.getService(this, PENDING_INTENTS_REQUEST_CODE, playIntent, PendingIntent.FLAG_UPDATE_CURRENT);
-        PendingIntent pausePendingIntent = PendingIntent.getService(this, PENDING_INTENTS_REQUEST_CODE, pauseIntent, PendingIntent.FLAG_UPDATE_CURRENT);
-        PendingIntent pendingNextIntent = PendingIntent.getService(this, PENDING_INTENTS_REQUEST_CODE, nextIntent, PendingIntent.FLAG_UPDATE_CURRENT);
+                PendingIntent pendingPreviousIntent = PendingIntent.getService(that, PENDING_INTENTS_REQUEST_CODE, previousIntent, PendingIntent.FLAG_UPDATE_CURRENT);
+                PendingIntent pendingPlayingIntent = PendingIntent.getService(that, PENDING_INTENTS_REQUEST_CODE, playIntent, PendingIntent.FLAG_UPDATE_CURRENT);
+                PendingIntent pausePendingIntent = PendingIntent.getService(that, PENDING_INTENTS_REQUEST_CODE, pauseIntent, PendingIntent.FLAG_UPDATE_CURRENT);
+                PendingIntent pendingNextIntent = PendingIntent.getService(that, PENDING_INTENTS_REQUEST_CODE, nextIntent, PendingIntent.FLAG_UPDATE_CURRENT);
 
-        builder.addAction(new Notification.Action(android.R.drawable.ic_media_previous, "Previous", pendingPreviousIntent));
-        builder.addAction(new Notification.Action(android.R.drawable.ic_media_play, "Play", pendingPlayingIntent));
-        builder.addAction(new Notification.Action(android.R.drawable.ic_media_pause, "Pause", pausePendingIntent));
-        builder.addAction(new Notification.Action(android.R.drawable.ic_media_next, "Next", pendingNextIntent));
+                builder.addAction(new Notification.Action(android.R.drawable.ic_media_previous, "Previous", pendingPreviousIntent));
+                builder.addAction(new Notification.Action(android.R.drawable.ic_media_play, "Play", pendingPlayingIntent));
+                builder.addAction(new Notification.Action(android.R.drawable.ic_media_pause, "Pause", pausePendingIntent));
+                builder.addAction(new Notification.Action(android.R.drawable.ic_media_next, "Next", pendingNextIntent));
 
-        notificationManager.notify(PlaybackService.PLAYBACK_CONTROLS_NOTIFICATION_ID, builder.build());
+                notificationManager.notify(PlaybackService.PLAYBACK_CONTROLS_NOTIFICATION_ID, builder.build());
+
+                return null;
+            }
+        }.execute();
+
+
 
     }
 
