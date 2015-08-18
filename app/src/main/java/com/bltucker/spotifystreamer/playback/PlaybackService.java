@@ -284,7 +284,8 @@ public class PlaybackService extends Service implements MediaPlayer.OnPreparedLi
                             .setContentText(currentTrack.trackTitle)
                             .setContentIntent(contentIntent)
                             .setLargeIcon(Picasso.with(that).load(currentTrack.trackThumbnailurl).get())
-                            .setStyle(new Notification.MediaStyle())
+                            .setStyle(new Notification.MediaStyle().setShowActionsInCompactView(1,2))
+                            .setVisibility(Notification.VISIBILITY_PUBLIC)
                             .setOngoing(true);
                 } catch (IOException e) {
                     e.printStackTrace();
