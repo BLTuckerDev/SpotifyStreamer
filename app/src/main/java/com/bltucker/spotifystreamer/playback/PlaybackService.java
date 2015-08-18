@@ -279,7 +279,7 @@ public class PlaybackService extends Service implements MediaPlayer.OnPreparedLi
                 Notification.Builder builder = null;
                 try {
                     builder = new Notification.Builder(that)
-                            .setSmallIcon(R.mipmap.ic_launcher)
+                            .setSmallIcon(R.drawable.ic_stat_av_play_circle_outline)
                             .setContentTitle(currentTrack.trackAlbumTitle)
                             .setContentText(currentTrack.trackTitle)
                             .setContentIntent(contentIntent)
