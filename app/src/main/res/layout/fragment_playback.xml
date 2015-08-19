@@ -1,119 +1,130 @@
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-             xmlns:tools="http://schemas.android.com/tools"
-             android:layout_width="match_parent"
-             android:layout_height="match_parent"
-              android:orientation="vertical"
-              android:layout_marginLeft="20dp"
-              android:layout_marginRight="20dp"
-             tools:context="com.bltucker.spotifystreamer.playback.PlaybackFragment">
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+            xmlns:tools="http://schemas.android.com/tools"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent">
 
 
-    <TextView
-        android:id="@+id/playback_artist_name"
-        android:layout_gravity="center_horizontal"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"/>
+    <LinearLayout android:layout_width="match_parent"
+                  android:layout_height="wrap_content"
+                  android:orientation="vertical"
+                  android:layout_marginLeft="20dp"
+                  android:layout_marginRight="20dp"
+                  tools:context="com.bltucker.spotifystreamer.playback.PlaybackFragment">
 
-
-    <TextView
-        android:id="@+id/playback_album_title"
-        android:layout_gravity="center_horizontal"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"/>
-
-
-    <ImageView
-        android:id="@+id/playback_album_art"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:src="@drawable/album_art_place_holder"/>
-
-
-    <TextView
-        android:id="@+id/playback_song_title"
-        android:layout_gravity="center_horizontal"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"/>
-
-
-    <SeekBar
-        android:id="@+id/playback_progress_bar"
-        style="@android:style/Widget.Holo.Light.ProgressBar.Horizontal"
-        android:max="30000"
-        android:progress="0"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"/>
-
-    <RelativeLayout
-        android:id="@+id/playback_timing_container"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content">
 
         <TextView
-            android:id="@+id/playback_current_time"
+            android:id="@+id/playback_artist_name"
+            android:layout_gravity="center_horizontal"
             android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="0:00"
-            android:layout_alignParentLeft="true"
-            />
+            android:layout_height="wrap_content"/>
+
 
         <TextView
-            android:id="@+id/playback_total_time"
+            android:id="@+id/playback_album_title"
+            android:layout_gravity="center_horizontal"
             android:layout_width="wrap_content"
+            android:layout_height="wrap_content"/>
+
+
+        <ImageView
+            android:id="@+id/playback_album_art"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="0:30"
-            android:layout_alignParentRight="true"
-            />
+            android:src="@drawable/album_art_place_holder"/>
 
 
-    </RelativeLayout>
+        <TextView
+            android:id="@+id/playback_song_title"
+            android:layout_gravity="center_horizontal"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"/>
 
 
-    <RelativeLayout
-        android:id="@+id/playback_buttons_container"
-        android:layout_width="match_parent"
-        android:layout_height="88dp"
-        android:padding="20dp"
-        android:layout_gravity="center">
+        <SeekBar
+            android:id="@+id/playback_progress_bar"
+            style="@android:style/Widget.Holo.Light.ProgressBar.Horizontal"
+            android:max="30000"
+            android:progress="0"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"/>
+
+        <RelativeLayout
+            android:id="@+id/playback_timing_container"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+
+            <TextView
+                android:id="@+id/playback_current_time"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="0:00"
+                android:layout_alignParentLeft="true"
+                />
+
+            <TextView
+                android:id="@+id/playback_total_time"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="0:30"
+                android:layout_alignParentRight="true"
+                />
+
+
+        </RelativeLayout>
+
+
+        <RelativeLayout
+            android:id="@+id/playback_buttons_container"
+            android:layout_width="match_parent"
+            android:layout_height="88dp"
+            android:padding="20dp"
+            android:layout_gravity="center">
 
 
 
-        <ImageButton
-            android:id="@+id/playback_back_button"
-            android:layout_width="48dp"
-            android:layout_height="48dp"
-            android:layout_alignParentLeft="true"
-            android:src="@android:drawable/ic_media_previous"
-            />
+            <ImageButton
+                android:id="@+id/playback_back_button"
+                android:layout_width="48dp"
+                android:layout_height="48dp"
+                android:layout_alignParentLeft="true"
+                android:src="@android:drawable/ic_media_previous"
+                />
 
-        <ImageButton
-            android:id="@+id/playback_play_button"
-            android:layout_width="48dp"
-            android:layout_height="48dp"
-            android:src="@android:drawable/ic_media_play"
-            android:layout_centerInParent="true"
-            />
-
-
-        <ImageButton
-            android:id="@+id/playback_pause_button"
-            android:layout_width="48dp"
-            android:layout_height="48dp"
-            android:src="@android:drawable/ic_media_pause"
-            android:visibility="invisible"
-            android:layout_centerInParent="true"/>
+            <ImageButton
+                android:id="@+id/playback_play_button"
+                android:layout_width="48dp"
+                android:layout_height="48dp"
+                android:src="@android:drawable/ic_media_play"
+                android:layout_centerInParent="true"
+                />
 
 
-
-        <ImageButton
-            android:id="@+id/playback_forward_button"
-            android:layout_width="48dp"
-            android:layout_height="48dp"
-            android:layout_alignParentRight="true"
-            android:src="@android:drawable/ic_media_next"
-            />
-
-    </RelativeLayout>
+            <ImageButton
+                android:id="@+id/playback_pause_button"
+                android:layout_width="48dp"
+                android:layout_height="48dp"
+                android:src="@android:drawable/ic_media_pause"
+                android:visibility="invisible"
+                android:layout_centerInParent="true"/>
 
 
-</LinearLayout>
+
+            <ImageButton
+                android:id="@+id/playback_forward_button"
+                android:layout_width="48dp"
+                android:layout_height="48dp"
+                android:layout_alignParentRight="true"
+                android:src="@android:drawable/ic_media_next"
+                />
+
+        </RelativeLayout>
+
+
+    </LinearLayout>
+
+
+</ScrollView>
+
+
+
+
