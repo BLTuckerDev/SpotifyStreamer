@@ -41,6 +41,7 @@ public class PlaybackFragment extends DialogFragment {
     private PlaybackServiceConnectionProvider fragmentListener;
     private PlaybackServiceConnection playbackServiceConnection;
     private ShareActionProvider shareActionProvider;
+    private boolean startedInDialogMode = false;
 
     @InjectView(R.id.playback_back_button)
     ImageButton backButton;
@@ -134,8 +135,15 @@ public class PlaybackFragment extends DialogFragment {
         super.onActivityCreated(savedInstanceState);
         TrackItem currentTrack = PlaybackSession.getCurrentSession().getCurrentTrack();
         this.updateFragmentUI(currentTrack);
+        if(this.startedInDialogMode){
+            this.startAutoPlay();
+        }
     }
 
+
+    public void setStartedInDialogMode(boolean startedInDialogMode) {
+        this.startedInDialogMode = startedInDialogMode;
+    }
 
     @OnClick(R.id.playback_back_button)
     public void onBackButtonClick(){
@@ -233,13 +241,42 @@ public class PlaybackFragment extends DialogFragment {
 
     @Subscribe
     public void onPlaybackServiceConnected(PlaybackServiceConnectedEvent event){
+        this.startAutoPlay();
+    }
+
+    @Subscribe
+    public void onNewPlaybackSessionStarted(NewPlaybackSessionStartedEvent event){
+        TrackItem currentTrack = PlaybackSession.getCurrentSession().getCurrentTrack();
+        this.updateFragmentUI(currentTrack);
+    }
+
+    @Subscribe
+    public void onPlaybackSessionTrackChangeEvent(PlaybackSessionCurrentTrackChangeEvent event){
+        this.updateFragmentUI(event.getCurrentTrack());
+    }
+
+
+    @Subscribe
+    public void onPlaybackStatusUpdateEvent(PlaybackStatusUpdateEvent event){
+        playbackProgressBar.setProgress(event.getCurrentTrackPosition());
+        String currentPlaybackTime = this.getFormattedPlaybackTimeFromMilliseconds(event.getCurrentTrackPosition());
+        currentPlaybackTimeTextView.setText(currentPlaybackTime);
+    }
+
+
+    private void startAutoPlay(){
+
+        if(!this.playbackServiceConnectionIsReady()){
+            return;
+        }
+
         TrackItem currentTrack = PlaybackSession.getCurrentSession().getCurrentTrack();
 
         boolean playing = this.playbackServiceConnection.getBoundService().isPlaying();
         boolean paused = this.playbackServiceConnection.getBoundService().isPaused();
 
         if(!playing && !paused){
-                //start fresh
+            //start fresh
             this.playTrack(currentTrack);
 
             this.pauseButton.setVisibility(View.VISIBLE);
@@ -276,25 +313,7 @@ public class PlaybackFragment extends DialogFragment {
         }
 
 
-    }
 
-    @Subscribe
-    public void onNewPlaybackSessionStarted(NewPlaybackSessionStartedEvent event){
-        TrackItem currentTrack = PlaybackSession.getCurrentSession().getCurrentTrack();
-        this.updateFragmentUI(currentTrack);
-    }
-
-    @Subscribe
-    public void onPlaybackSessionTrackChangeEvent(PlaybackSessionCurrentTrackChangeEvent event){
-        this.updateFragmentUI(event.getCurrentTrack());
-    }
-
-
-    @Subscribe
-    public void onPlaybackStatusUpdateEvent(PlaybackStatusUpdateEvent event){
-        playbackProgressBar.setProgress(event.getCurrentTrackPosition());
-        String currentPlaybackTime = this.getFormattedPlaybackTimeFromMilliseconds(event.getCurrentTrackPosition());
-        currentPlaybackTimeTextView.setText(currentPlaybackTime);
     }
 
 

@@ -3,7 +3,9 @@ package com.bltucker.spotifystreamer.artists;
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
+import android.net.Uri;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 
@@ -21,11 +23,14 @@ import com.bltucker.spotifystreamer.tracks.TrackListActivity;
 import com.bltucker.spotifystreamer.tracks.TrackListFragment;
 import com.squareup.otto.Subscribe;
 
+import java.io.IOException;
 import java.util.List;
 
 
 public class ArtistSearchActivity extends Activity implements ArtistSearchFragment.OnFragmentInteractionListener,
         TrackListFragment.OnFragmentInteractionListener, PlaybackServiceConnectionProvider {
+
+    private static final String LOG_TAG = ArtistSearchActivity.class.getSimpleName();
 
     private boolean twoPaneMode = false;
     private MenuItem nowPlayingMenuItem;
@@ -114,6 +119,7 @@ public class ArtistSearchActivity extends Activity implements ArtistSearchFragme
 
         if(twoPaneMode){
             PlaybackFragment playbackFragment = PlaybackFragment.newInstance();
+            playbackFragment.setStartedInDialogMode(true);
             playbackFragment.show(getFragmentManager(), "playback");
         } else {
             PlaybackActivity.launch(this);
