@@ -115,7 +115,7 @@ public class TrackListActivity extends Activity implements TrackListFragment.OnF
 
 
     private void setNowPlayingMenuItemVisibility(){
-        if(this.playbackServiceConnection.isActive() && this.playbackServiceConnection.getBoundService().isPlaying()){
+        if(this.playbackServiceConnection.isActive() && (this.playbackServiceConnection.getBoundService().isPlaying() || this.playbackServiceConnection.getBoundService().isPaused())){
             nowPlayingMenuItem.setVisible(true);
         }
     }

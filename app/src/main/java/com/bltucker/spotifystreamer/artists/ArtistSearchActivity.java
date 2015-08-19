@@ -134,7 +134,7 @@ public class ArtistSearchActivity extends Activity implements ArtistSearchFragme
 
 
     private void setNowPlayingMenuItemVisibility(){
-        if(this.playbackServiceConnection.isActive() && !twoPaneMode && this.playbackServiceConnection.getBoundService().isPlaying()){
+        if(this.playbackServiceConnection.isActive() && !twoPaneMode && (this.playbackServiceConnection.getBoundService().isPlaying() || this.playbackServiceConnection.getBoundService().isPaused())){
             nowPlayingMenuItem.setVisible(true);
         }
     }
