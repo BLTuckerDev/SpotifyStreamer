@@ -268,6 +268,11 @@ public class PlaybackService extends Service implements MediaPlayer.OnPreparedLi
 
         final PlaybackService that = this;
 
+        /*
+        * I make use of an async task here to create my notifications because I use Picasso to load a bitmap
+        * for the notification thumbnail and when I did this on the main thread I received an error since I was
+        * making a blocking network request on the main thread to load the picture. The async task ensures I am doing all of that in
+        * the background. */
         new AsyncTask<Void, Void, Void>() {
             @Override
             protected Void doInBackground(Void... params) {
