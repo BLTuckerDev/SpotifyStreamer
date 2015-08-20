@@ -14,4 +14,5 @@
     <string name="country_code_preference_title">Country Code</string>
     <string name="preference_default_country_code">US</string>
     <string name="preference_show_notification_controls_title">Show playback control notifications</string>
+    <string name="list_to_this">Listen to this!</string>
 </resources>
