@@ -7,13 +7,16 @@ import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuItem;
 
+import com.bltucker.spotifystreamer.EventBus;
 import com.bltucker.spotifystreamer.R;
 import com.bltucker.spotifystreamer.SettingsActivity;
+import com.bltucker.spotifystreamer.playback.NewPlaybackSessionStartedEvent;
 import com.bltucker.spotifystreamer.playback.PlaybackActivity;
 import com.bltucker.spotifystreamer.playback.PlaybackService;
 import com.bltucker.spotifystreamer.playback.PlaybackServiceConnectedEvent;
 import com.bltucker.spotifystreamer.playback.PlaybackServiceConnection;
 import com.bltucker.spotifystreamer.playback.PlaybackSession;
+import com.bltucker.spotifystreamer.playback.PlaybackSessionCurrentTrackChangeEvent;
 import com.squareup.otto.Subscribe;
 
 import java.util.List;
@@ -38,6 +41,7 @@ public class TrackListActivity extends Activity implements TrackListFragment.OnF
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_track_list);
+        EventBus.getEventBus().register(this);
 
         if(null == savedInstanceState){
 
@@ -68,6 +72,7 @@ public class TrackListActivity extends Activity implements TrackListFragment.OnF
 
     @Override
     protected void onDestroy() {
+        EventBus.getEventBus().unregister(this);
         this.playbackServiceConnection.unbind(this);
         super.onDestroy();
     }
@@ -83,7 +88,7 @@ public class TrackListActivity extends Activity implements TrackListFragment.OnF
     public boolean onCreateOptionsMenu(Menu menu) {
         super.onCreateOptionsMenu(menu);
 
-        getMenuInflater().inflate(R.menu.menu_main, menu);
+        getMenuInflater().inflate(R.menu.track_list_menu, menu);
         nowPlayingMenuItem = menu.findItem(R.id.action_now_playing);
 
         return true;
@@ -115,6 +120,12 @@ public class TrackListActivity extends Activity implements TrackListFragment.OnF
 
 
     private void setNowPlayingMenuItemVisibility(){
+
+        if(this.nowPlayingMenuItem == null){
+            return;
+        }
+
+
         if(this.playbackServiceConnection.isActive() && (this.playbackServiceConnection.getBoundService().isPlaying() || this.playbackServiceConnection.getBoundService().isPaused())){
             nowPlayingMenuItem.setVisible(true);
         }
