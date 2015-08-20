@@ -6,11 +6,15 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.widget.ShareActionProvider;
 
 import com.bltucker.spotifystreamer.R;
 import com.bltucker.spotifystreamer.SettingsActivity;
+import com.bltucker.spotifystreamer.tracks.TrackItem;
 
 public class PlaybackActivity extends Activity implements PlaybackServiceConnectionProvider {
+
+    private ShareActionProvider shareActionProvider;
 
     public static void launch(Context context){
         Intent intent = new Intent(context, PlaybackActivity.class);
@@ -56,7 +60,11 @@ public class PlaybackActivity extends Activity implements PlaybackServiceConnect
     public boolean onCreateOptionsMenu(Menu menu) {
         super.onCreateOptionsMenu(menu);
 
-        getMenuInflater().inflate(R.menu.menu_main, menu);
+        getMenuInflater().inflate(R.menu.menu_playback, menu);
+
+        MenuItem shareItem = menu.findItem(R.id.menu_item_share);
+        shareActionProvider = (ShareActionProvider) shareItem.getActionProvider();
+        this.updateShareProviderIntent();
 
         return true;
     }
@@ -72,6 +80,28 @@ public class PlaybackActivity extends Activity implements PlaybackServiceConnect
         }
 
         return super.onOptionsItemSelected(item);
+    }
+
+    private void updateShareProviderIntent(){
+
+        if(shareActionProvider == null){
+            return;
+        }
+
+        TrackItem currentTrack = PlaybackSession.getCurrentSession().getCurrentTrack();
+
+        if(currentTrack == null){
+            return;
+        }
+
+        Intent shareIntent = new Intent(Intent.ACTION_SEND);
+
+        shareIntent.setType("text/plain");
+        shareIntent.putExtra(Intent.EXTRA_SUBJECT, getString(R.string.list_to_this));
+        shareIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_DOCUMENT);
+        shareIntent.putExtra(Intent.EXTRA_TEXT, currentTrack.externalShareUrl);
+
+        this.shareActionProvider.setShareIntent(shareIntent);
     }
 
     @Override
