@@ -3,21 +3,15 @@ package com.bltucker.spotifystreamer.playback;
 import android.app.Activity;
 import android.app.DialogFragment;
 import android.content.DialogInterface;
-import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.LayoutInflater;
-import android.view.Menu;
-import android.view.MenuInflater;
-import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageButton;
 import android.widget.ImageView;
-import android.widget.ProgressBar;
 import android.widget.SeekBar;
-import android.widget.ShareActionProvider;
 import android.widget.TextView;
 
 import com.bltucker.spotifystreamer.EventBus;
@@ -33,14 +27,12 @@ import butterknife.InjectView;
 import butterknife.OnClick;
 
 public class PlaybackFragment extends DialogFragment {
-    //TODO we need a scroll view to handle horizontal playback
-//TODO when we rotate we need to check on the state of the play button and store that!
 
     private static final String LOG_TAG = PlaybackFragment.class.getSimpleName();
 
     private PlaybackServiceConnectionProvider fragmentListener;
     private PlaybackServiceConnection playbackServiceConnection;
-    private ShareActionProvider shareActionProvider;
+
     private boolean startedInDialogMode = false;
 
     @InjectView(R.id.playback_back_button)
@@ -77,23 +69,6 @@ public class PlaybackFragment extends DialogFragment {
     public static PlaybackFragment newInstance() {
         PlaybackFragment fragment = new PlaybackFragment();
         return fragment;
-    }
-
-
-    public PlaybackFragment() {
-        this.setHasOptionsMenu(true);
-    }
-
-
-    @Override
-    public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
-        super.onCreateOptionsMenu(menu, inflater);
-
-        inflater.inflate(R.menu.menu_playback, menu);
-
-        MenuItem shareItem = menu.findItem(R.id.menu_item_share);
-        shareActionProvider = (ShareActionProvider) shareItem.getActionProvider();
-        this.updateShareProviderIntent();
     }
 
 
@@ -224,14 +199,11 @@ public class PlaybackFragment extends DialogFragment {
         return this.playbackServiceConnection != null && this.playbackServiceConnection.isActive();
     }
 
-
-
     private void playTrack(TrackItem track){
         try {
 
             if(this.playbackServiceConnectionIsReady()){
                 this.playbackServiceConnection.getBoundService().playSong(Uri.parse(track.previewUrl));
-                this.updateShareProviderIntent();
             }
 
         } catch (IOException e) {
@@ -328,38 +300,6 @@ public class PlaybackFragment extends DialogFragment {
         artistNameTextView.setText(currentTrack.trackArtistName);
         albumTitleTextView.setText(currentTrack.trackAlbumTitle);
         songTitleTextView.setText(currentTrack.trackTitle);
-    }
-
-
-    private void updateShareProviderIntent(){
-
-        if(shareActionProvider == null){
-            return;
-        }
-
-        TrackItem currentTrack = PlaybackSession.getCurrentSession().getCurrentTrack();
-
-        if(currentTrack == null){
-            return;
-        }
-
-        Intent shareIntent = new Intent(Intent.ACTION_SEND);
-
-        shareIntent.setType("text/plain");
-        shareIntent.putExtra(Intent.EXTRA_SUBJECT, "Listen to this!");
-        shareIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_DOCUMENT);
-        shareIntent.putExtra(Intent.EXTRA_TEXT, currentTrack.externalShareUrl);
-
-        this.shareActionProvider.setShareIntent(shareIntent);
-    }
-
-    @Override
-    public void onDismiss(DialogInterface dialog) {
-        super.onDismiss(dialog);
-
-        if(this.playbackServiceConnectionIsReady()){
-            this.playbackServiceConnection.getBoundService().stopSong();
-        }
     }
 
 }
