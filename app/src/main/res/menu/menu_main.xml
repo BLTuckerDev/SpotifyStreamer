@@ -5,11 +5,21 @@
       <item android:id="@+id/action_now_playing"
             android:title="Now Playing"
             android:visible="false"
-            android:showAsAction="ifRoom"/>
+            android:showAsAction="always"/>
+
+      <item
+          android:id="@+id/menu_item_share"
+          android:showAsAction="ifRoom"
+          android:title="Share"
+          android:visible="false"
+          android:actionProviderClass="android.widget.ShareActionProvider" />
+
 
       <item android:id="@+id/action_settings"
             android:title="@string/action_settings"
             android:orderInCategory="100"
             android:showAsAction="never"/>
+
+
 
 </menu>
