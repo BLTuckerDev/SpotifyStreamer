@@ -3,12 +3,12 @@ package com.bltucker.spotifystreamer.artists;
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
-import android.net.Uri;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.widget.ShareActionProvider;
 
+import com.bltucker.spotifystreamer.EventBus;
 import com.bltucker.spotifystreamer.R;
 import com.bltucker.spotifystreamer.SettingsActivity;
 import com.bltucker.spotifystreamer.playback.PlaybackActivity;
@@ -23,7 +23,6 @@ import com.bltucker.spotifystreamer.tracks.TrackListActivity;
 import com.bltucker.spotifystreamer.tracks.TrackListFragment;
 import com.squareup.otto.Subscribe;
 
-import java.io.IOException;
 import java.util.List;
 
 
@@ -34,6 +33,9 @@ public class ArtistSearchActivity extends Activity implements ArtistSearchFragme
 
     private boolean twoPaneMode = false;
     private MenuItem nowPlayingMenuItem;
+    private MenuItem shareMenuItem;
+
+    private ShareActionProvider shareActionProvider;
 
     private PlaybackServiceConnection playbackServiceConnection = new PlaybackServiceConnection();
 
@@ -41,6 +43,7 @@ public class ArtistSearchActivity extends Activity implements ArtistSearchFragme
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        EventBus.getEventBus().register(this);
 
         if(findViewById(R.id.main_activity_track_list_fragment) != null){
             twoPaneMode = true;
@@ -50,6 +53,7 @@ public class ArtistSearchActivity extends Activity implements ArtistSearchFragme
     @Override
     protected void onStart() {
         super.onStart();
+
 
         Intent playbackServiceIntent = new Intent(this, PlaybackService.class);
         bindService(playbackServiceIntent, playbackServiceConnection, Context.BIND_AUTO_CREATE);
@@ -61,11 +65,17 @@ public class ArtistSearchActivity extends Activity implements ArtistSearchFragme
     protected void onResume() {
         super.onResume();
         this.setNowPlayingMenuItemVisibility();
+
+        if(PlaybackSession.getCurrentSession() != null){
+            this.setSharingMenuItemVisibility();
+        }
+
     }
 
 
     @Override
     protected void onDestroy() {
+        EventBus.getEventBus().unregister(this);
         this.playbackServiceConnection.unbind(this);
         super.onDestroy();
     }
@@ -77,6 +87,12 @@ public class ArtistSearchActivity extends Activity implements ArtistSearchFragme
 
         getMenuInflater().inflate(R.menu.menu_main, menu);
         nowPlayingMenuItem = menu.findItem(R.id.action_now_playing);
+        shareMenuItem = menu.findItem(R.id.menu_item_share);
+
+        shareActionProvider = (ShareActionProvider) shareMenuItem.getActionProvider();
+        this.updateShareProviderIntent();
+
+        this.setNowPlayingMenuItemVisibility();
 
         return true;
     }
@@ -121,6 +137,8 @@ public class ArtistSearchActivity extends Activity implements ArtistSearchFragme
             PlaybackFragment playbackFragment = PlaybackFragment.newInstance();
             playbackFragment.setStartedInDialogMode(true);
             playbackFragment.show(getFragmentManager(), "playback");
+            this.setSharingMenuItemVisibility();
+            this.updateShareProviderIntent();
         } else {
             PlaybackActivity.launch(this);
         }
@@ -134,9 +152,50 @@ public class ArtistSearchActivity extends Activity implements ArtistSearchFragme
 
 
     private void setNowPlayingMenuItemVisibility(){
+
+        if(this.nowPlayingMenuItem == null){
+            return;
+        }
+
         if(this.playbackServiceConnection.isActive() && !twoPaneMode && (this.playbackServiceConnection.getBoundService().isPlaying() || this.playbackServiceConnection.getBoundService().isPaused())){
             nowPlayingMenuItem.setVisible(true);
         }
+    }
+
+    private void setSharingMenuItemVisibility(){
+
+        if(this.shareMenuItem != null && twoPaneMode){
+            shareMenuItem.setVisible(true);
+        }
+
+    }
+
+    private void updateShareProviderIntent(){
+
+        if(shareActionProvider == null){
+            return;
+        }
+
+        PlaybackSession session = PlaybackSession.getCurrentSession();
+
+        if(session == null){
+            return;
+        }
+
+        TrackItem currentTrack = PlaybackSession.getCurrentSession().getCurrentTrack();
+
+        if(currentTrack == null){
+            return;
+        }
+
+        Intent shareIntent = new Intent(Intent.ACTION_SEND);
+
+        shareIntent.setType("text/plain");
+        shareIntent.putExtra(Intent.EXTRA_SUBJECT, getString(R.string.list_to_this));
+        shareIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_DOCUMENT);
+        shareIntent.putExtra(Intent.EXTRA_TEXT, currentTrack.externalShareUrl);
+
+        this.shareActionProvider.setShareIntent(shareIntent);
     }
 
     @Override
